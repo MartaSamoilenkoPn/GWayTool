@@ -1,0 +1,6 @@
+# ninja log v6
+1	527	1728824301872093754	CMakeFiles/GWayTool.dir/src/Application.cpp.o	374069c5dfac8bb4
+1	581	1728824301872093754	CMakeFiles/GWayTool.dir/src/Button.cpp.o	c6ca13f7d0f139d7
+2	702	1728824301873093745	CMakeFiles/GWayTool.dir/examples/main.cpp.o	574b1b31d614f816
+2	632	1728824301873093745	CMakeFiles/GWayTool.dir/src/Window.cpp.o	1c867e292c608b2c
+2	295	1728824301873093745	CMakeFiles/GWayTool.dir/src/Control.cpp.o	2ee66dfc6a3a391b
