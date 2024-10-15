@@ -1,7 +1,8 @@
 CMakeFiles/GWayTool.dir/src/Button.cpp.o: \
  /home/marta/ucu/os/GWayTool/src/Button.cpp /usr/include/stdc-predef.h \
- /home/marta/ucu/os/GWayTool/src/Button.h \
- /home/marta/ucu/os/GWayTool/src/Control.h /usr/include/c++/13/functional \
+ /home/marta/ucu/os/GWayTool/include/Button.h \
+ /home/marta/ucu/os/GWayTool/include/Control.h \
+ /usr/include/c++/13/functional \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -105,7 +106,7 @@ CMakeFiles/GWayTool.dir/src/Button.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/include/c++/13/bits/std_abs.h \
- /home/marta/ucu/os/GWayTool/src/Color.h /usr/include/cairo/cairo.h \
+ /home/marta/ucu/os/GWayTool/include/Color.h /usr/include/cairo/cairo.h \
  /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h \
  /usr/include/wayland-client-protocol.h \
@@ -170,4 +171,4 @@ CMakeFiles/GWayTool.dir/src/Button.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
- /home/marta/ucu/os/GWayTool/src/Events.h
+ /home/marta/ucu/os/GWayTool/include/Events.h

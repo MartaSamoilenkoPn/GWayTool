@@ -1,6 +1,6 @@
 CMakeFiles/GWayTool.dir/examples/main.cpp.o: \
  /home/marta/ucu/os/GWayTool/examples/main.cpp /usr/include/stdc-predef.h \
- /home/marta/ucu/os/GWayTool/src/Application.h \
+ /home/marta/ucu/os/GWayTool/include/Application.h \
  /usr/include/wayland-client.h /usr/include/wayland-client-core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
@@ -186,15 +186,15 @@ CMakeFiles/GWayTool.dir/examples/main.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc \
- /home/marta/ucu/os/GWayTool/src/Window.h /usr/include/cairo/cairo.h \
+ /home/marta/ucu/os/GWayTool/include/Window.h /usr/include/cairo/cairo.h \
  /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h /usr/include/c++/13/vector \
  /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
- /home/marta/ucu/os/GWayTool/src/Control.h /usr/include/c++/13/functional \
- /usr/include/c++/13/bits/std_function.h \
+ /home/marta/ucu/os/GWayTool/include/Control.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
  /usr/include/c++/13/bits/hashtable.h \
@@ -208,6 +208,6 @@ CMakeFiles/GWayTool.dir/examples/main.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h \
- /home/marta/ucu/os/GWayTool/src/Color.h \
+ /home/marta/ucu/os/GWayTool/include/Color.h \
  /usr/include/wayland-client-protocol.h \
- /home/marta/ucu/os/GWayTool/src/Button.h
+ /home/marta/ucu/os/GWayTool/include/Button.h

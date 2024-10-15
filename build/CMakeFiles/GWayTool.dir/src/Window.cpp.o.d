@@ -1,7 +1,7 @@
 CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /home/marta/ucu/os/GWayTool/src/Window.cpp /usr/include/stdc-predef.h \
- /home/marta/ucu/os/GWayTool/src/Window.h /usr/include/wayland-client.h \
- /usr/include/wayland-client-core.h \
+ /home/marta/ucu/os/GWayTool/include/Window.h \
+ /usr/include/wayland-client.h /usr/include/wayland-client-core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -125,9 +125,9 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/bits/ranges_util.h \
  /usr/include/c++/13/bits/ranges_base.h \
  /usr/include/c++/13/bits/max_size_type.h /usr/include/c++/13/numbers \
- /home/marta/ucu/os/GWayTool/src/Control.h /usr/include/c++/13/functional \
- /usr/include/c++/13/bits/std_function.h /usr/include/c++/13/typeinfo \
- /usr/include/c++/13/unordered_map \
+ /home/marta/ucu/os/GWayTool/include/Control.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/typeinfo /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
  /usr/include/c++/13/bits/hashtable.h \
  /usr/include/c++/13/bits/hashtable_policy.h \
@@ -140,13 +140,14 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h /usr/include/c++/13/cstdlib \
- /home/marta/ucu/os/GWayTool/src/Color.h \
+ /home/marta/ucu/os/GWayTool/include/Color.h \
  /usr/include/wayland-client-protocol.h \
- /home/marta/ucu/os/GWayTool/src/Events.h /usr/include/c++/13/iostream \
- /usr/include/c++/13/ostream /usr/include/c++/13/ios \
- /usr/include/c++/13/iosfwd /usr/include/c++/13/bits/stringfwd.h \
- /usr/include/c++/13/bits/postypes.h /usr/include/c++/13/cwchar \
- /usr/include/wchar.h /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
+ /home/marta/ucu/os/GWayTool/include/Events.h \
+ /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
+ /usr/include/c++/13/ios /usr/include/c++/13/iosfwd \
+ /usr/include/c++/13/bits/stringfwd.h /usr/include/c++/13/bits/postypes.h \
+ /usr/include/c++/13/cwchar /usr/include/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \

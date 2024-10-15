@@ -1,6 +1,7 @@
 CMakeFiles/GWayTool.dir/src/Control.cpp.o: \
  /home/marta/ucu/os/GWayTool/src/Control.cpp /usr/include/stdc-predef.h \
- /home/marta/ucu/os/GWayTool/src/Control.h /usr/include/c++/13/functional \
+ /home/marta/ucu/os/GWayTool/include/Control.h \
+ /usr/include/c++/13/functional \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -104,7 +105,7 @@ CMakeFiles/GWayTool.dir/src/Control.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/include/c++/13/bits/std_abs.h \
- /home/marta/ucu/os/GWayTool/src/Color.h /usr/include/cairo/cairo.h \
+ /home/marta/ucu/os/GWayTool/include/Color.h /usr/include/cairo/cairo.h \
  /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h \
  /usr/include/wayland-client-protocol.h \

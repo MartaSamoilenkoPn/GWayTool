@@ -1,6 +1,7 @@
 CMakeFiles/GWayTool.dir/src/Application.cpp.o: \
  /home/marta/ucu/os/GWayTool/src/Application.cpp \
- /usr/include/stdc-predef.h /home/marta/ucu/os/GWayTool/src/Application.h \
+ /usr/include/stdc-predef.h \
+ /home/marta/ucu/os/GWayTool/include/Application.h \
  /usr/include/wayland-client.h /usr/include/wayland-client-core.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
