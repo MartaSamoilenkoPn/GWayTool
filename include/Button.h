@@ -10,7 +10,7 @@ public:
     Button(int x, int y, int width, int height, const std::string& label);
     ~Button() override = default;
 
-    void draw(cairo_t* cr) override;
+    void draw(cairo_t* cr, cairo_surface_t* surface);
 
     void onMouseEnter(const MouseEvent& event) override;
     void onMouseLeave(const MouseEvent& event) override;

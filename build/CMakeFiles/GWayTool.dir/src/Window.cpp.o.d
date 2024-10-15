@@ -140,6 +140,8 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h /usr/include/c++/13/cstdlib \
+ /home/marta/ucu/os/GWayTool/src/Color.h \
+ /usr/include/wayland-client-protocol.h \
  /home/marta/ucu/os/GWayTool/src/Events.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/ostream /usr/include/c++/13/ios \
  /usr/include/c++/13/iosfwd /usr/include/c++/13/bits/stringfwd.h \
@@ -207,4 +209,22 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/cstring \
- /usr/include/string.h /usr/include/strings.h
+ /usr/include/string.h /usr/include/strings.h /usr/include/fcntl.h \
+ /usr/include/x86_64-linux-gnu/bits/fcntl.h \
+ /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
+ /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/stat.h \
+ /usr/include/x86_64-linux-gnu/bits/struct_stat.h \
+ /usr/include/x86_64-linux-gnu/sys/mman.h \
+ /usr/include/x86_64-linux-gnu/bits/mman.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-map-flags-generic.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-linux.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-shared.h \
+ /usr/include/x86_64-linux-gnu/bits/mman_ext.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h

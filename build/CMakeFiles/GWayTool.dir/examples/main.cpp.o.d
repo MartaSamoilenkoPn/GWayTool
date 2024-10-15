@@ -208,4 +208,6 @@ CMakeFiles/GWayTool.dir/examples/main.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h \
+ /home/marta/ucu/os/GWayTool/src/Color.h \
+ /usr/include/wayland-client-protocol.h \
  /home/marta/ucu/os/GWayTool/src/Button.h

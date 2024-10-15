@@ -11,10 +11,10 @@ public:
 
     int run();
 
+    wl_display* getDisplay() const;
+
 private:
     struct wl_display* display;
-    struct wl_registry* registry;
-
 };
 
 #endif // APPLICATION_H
