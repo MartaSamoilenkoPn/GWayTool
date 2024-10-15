@@ -3,12 +3,43 @@
 #include <iostream>
 #include <cstring>
 #include <stdexcept>
+#include <cstdlib>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <syscall.h>
+#include <unistd.h>
+#include <sys/mman.h>
 
+static int createAnonymousFile(off_t size) {
+    char templateName[] = "/wl_shm-XXXXXX";
+    const char* path = getenv("XDG_RUNTIME_DIR");
+    if (!path) {
+        throw std::runtime_error("XDG_RUNTIME_DIR not set");
+    }
 
-void Window::registryHandler(void* data, struct wl_registry* registry, uint32_t id, const char* interface, uint32_t version) {
+    std::string fullPath = std::string(path) + templateName;
+    int fd = mkstemp(&fullPath[0]);
+    if (fd < 0) {
+        throw std::runtime_error("Failed to create a temporary file");
+    }
+
+    unlink(fullPath.c_str());
+
+    if (ftruncate(fd, size) < 0) {
+        close(fd);
+        throw std::runtime_error("Failed to set size on temporary file");
+    }
+
+    return fd;
+}
+
+void Window::registryHandler(void* data, struct wl_registry* registry, unsigned int id, const char* interface, unsigned int version) {
     Window* window = static_cast<Window*>(data);
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
         window->compositor = static_cast<wl_compositor*>(wl_registry_bind(registry, id, &wl_compositor_interface, 1));
+    } else if (strcmp(interface, wl_shm_interface.name) == 0) {
+        window->shm = static_cast<wl_shm*>(wl_registry_bind(registry, id, &wl_shm_interface, 1));
     } else if (strcmp(interface, wl_seat_interface.name) == 0) {
         window->seat = static_cast<wl_seat*>(wl_registry_bind(registry, id, &wl_seat_interface, 1));
         window->pointer = wl_seat_get_pointer(window->seat);
@@ -24,29 +55,60 @@ void Window::registryHandler(void* data, struct wl_registry* registry, uint32_t 
     }
 }
 
-Window::Window(int width, int height)
-    : width(width), height(height), display(nullptr), surface(nullptr),
-      compositor(nullptr), seat(nullptr), pointer(nullptr),
-      cairoSurface(nullptr), hoveredControl(nullptr), pressedControl(nullptr) {
-    display = wl_display_connect(nullptr);
+Window::Window(int width, int height, wl_display* display)
+    : width(width), height(height), display(display), surface(nullptr),
+      compositor(nullptr), shm(nullptr), seat(nullptr), pointer(nullptr),
+      shmData(nullptr), shmSize(0), buffer(nullptr),
+      hoveredControl(nullptr), pressedControl(nullptr) {
+
     if (!display) {
-        throw std::runtime_error("Failed to connect to Wayland display");
+        throw std::runtime_error("Invalid Wayland display");
     }
 
-    struct wl_registry* registry = wl_display_get_registry(display);
+    wl_registry* registry = wl_display_get_registry(display);
+
     static const wl_registry_listener registryListener = {
         registryHandler,
         nullptr
     };
+
     wl_registry_add_listener(registry, &registryListener, this);
     wl_display_roundtrip(display);
 
     if (!compositor) {
-        throw std::runtime_error("Failed to get compositor");
+        throw std::runtime_error("Failed to get wl_compositor");
+    }
+    if (!shm) {
+        throw std::runtime_error("Failed to get wl_shm");
     }
 
     surface = wl_compositor_create_surface(compositor);
 
+    int stride = width * 4;
+    shmSize = stride * height;
+
+    // int fd = createAnonymousFile(shmSize);
+
+    int fd = syscall(SYS_memfd_create, "buffer", 0);
+    ftruncate(fd, shmSize);
+
+    shmData = mmap(nullptr, shmSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (shmData == MAP_FAILED) {
+        close(fd);
+        throw std::runtime_error("Failed to mmap buffer");
+    }
+
+    wl_shm_pool* pool = wl_shm_create_pool(shm, fd, shmSize);
+
+    buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_ARGB8888);
+
+    wl_surface_attach(surface, buffer, 0, 0);
+    wl_surface_commit(surface);
+
+    wl_shm_pool_destroy(pool);
+    close(fd);
+
+    memset(shmData, 0, shmSize);
 }
 
 Window::~Window() {
@@ -56,14 +118,17 @@ Window::~Window() {
     if (seat) {
         wl_seat_destroy(seat);
     }
+    if (buffer) {
+        wl_buffer_destroy(buffer);
+    }
+    if (shmData) {
+        munmap(shmData, shmSize);
+    }
     if (surface) {
         wl_surface_destroy(surface);
     }
     if (compositor) {
         wl_compositor_destroy(compositor);
-    }
-    if (display) {
-        wl_display_disconnect(display);
     }
 }
 
@@ -72,21 +137,26 @@ void Window::addControl(Control* control) {
 }
 
 void Window::show() {
-    while (true) {
-        cairo_t* cr = cairo_create(cairoSurface);
-        cairo_set_source_rgb(cr, 1, 1, 1); // White background
-        cairo_paint(cr);
+    std::cout << __FUNCTION__ << std::endl;
 
-        for (auto control : controls) {
-            control->draw(cr);
-        }
+    unsigned int* pixels = static_cast<unsigned int*>(shmData);
+    int totalPixels = width * height;
+    unsigned int color = 0xFFFFFFFF;
 
-        cairo_destroy(cr);
+    for (int i = 0; i < totalPixels; ++i) {
+        pixels[i] = color;
+    }
 
-        wl_display_flush(display);
+    for (auto control : controls) {
+        control->draw(shmData, width, height);
+    }
+
+    wl_surface_damage(surface, 0, 0, width, height);
+    wl_surface_commit(surface);
+    wl_display_flush(display);
+
+    while (1) {
         wl_display_dispatch(display);
-
-        break;
     }
 }
 
@@ -99,7 +169,7 @@ Control* Window::findControlAt(int x, int y) {
     return nullptr;
 }
 
-void Window::pointerEnter(void* data, struct wl_pointer* wl_pointer, uint32_t serial,
+void Window::pointerEnter(void* data, struct wl_pointer* wl_pointer, unsigned int serial,
                           struct wl_surface* surface, wl_fixed_t sx, wl_fixed_t sy) {
     Window* window = static_cast<Window*>(data);
     window->pointerX = wl_fixed_to_int(sx);
@@ -111,7 +181,7 @@ void Window::pointerEnter(void* data, struct wl_pointer* wl_pointer, uint32_t se
     }
 }
 
-void Window::pointerLeave(void* data, struct wl_pointer* wl_pointer, uint32_t serial,
+void Window::pointerLeave(void* data, struct wl_pointer* wl_pointer, unsigned int serial,
                           struct wl_surface* surface) {
     Window* window = static_cast<Window*>(data);
     if (window->hoveredControl) {
@@ -121,7 +191,7 @@ void Window::pointerLeave(void* data, struct wl_pointer* wl_pointer, uint32_t se
     }
 }
 
-void Window::pointerMotion(void* data, struct wl_pointer* wl_pointer, uint32_t time,
+void Window::pointerMotion(void* data, struct wl_pointer* wl_pointer, unsigned int time,
                            wl_fixed_t sx, wl_fixed_t sy) {
     Window* window = static_cast<Window*>(data);
     int x = wl_fixed_to_int(sx);
@@ -148,8 +218,8 @@ void Window::pointerMotion(void* data, struct wl_pointer* wl_pointer, uint32_t t
     }
 }
 
-void Window::pointerButton(void* data, struct wl_pointer* wl_pointer, uint32_t serial,
-                            unsigned int time, unsigned int button, uint32_t state) {
+void Window::pointerButton(void* data, struct wl_pointer* wl_pointer, unsigned int serial,
+                           unsigned int time, unsigned int button, unsigned int state) {
     Window* window = static_cast<Window*>(data);
     if (window->hoveredControl) {
         MouseEvent event{window->pointerX, window->pointerY, button, time};
@@ -166,6 +236,6 @@ void Window::pointerButton(void* data, struct wl_pointer* wl_pointer, uint32_t s
     }
 }
 
-void Window::pointerAxis(void* data, struct wl_pointer* wl_pointer, uint32_t time,
-                         uint32_t axis, wl_fixed_t value) {
+void Window::pointerAxis(void* data, struct wl_pointer* wl_pointer, unsigned int time,
+                         unsigned int axis, wl_fixed_t value) {
 }

@@ -2,13 +2,10 @@
 #define EVENTS_H
 
 struct MouseEvent {
-    int pointer_x;
-    int pointer_y;
-    unsigned int button;
+    int x;
+    int y;
+    unsigned int button; // 1: Left, 2: Right, 3: Middle
     unsigned int time;
-    MouseEvent() = default;
-    MouseEvent(int pointer_x, int pointer_y, unsigned int button, unsigned int time) :
-                pointer_x(pointer_x), pointer_y(pointer_y), button(button), time(time) {};
 };
 
 struct KeyboardEvent {
@@ -16,4 +13,4 @@ struct KeyboardEvent {
     unsigned int time;
 };
 
-#endif
+#endif // EVENTS_H

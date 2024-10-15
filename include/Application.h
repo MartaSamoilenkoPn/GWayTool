@@ -14,7 +14,7 @@ public:
     wl_display* getDisplay() const;
 
 private:
-    struct wl_display* display;
+    wl_display* display;
 };
 
 #endif // APPLICATION_H

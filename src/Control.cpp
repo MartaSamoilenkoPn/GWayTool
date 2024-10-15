@@ -9,8 +9,9 @@ int Control::getWidth() const { return width; }
 int Control::getHeight() const { return height; }
 
 bool Control::containsPoint(int px, int py) const {
-    return px >= x && px <= x + width && py >= y && py <= y + height;
+    return px >= x && px < x + width && py >= y && py < y + height;
 }
+
 
 void Control::onMouseEnter(const MouseEvent& event) {}
 void Control::onMouseLeave(const MouseEvent& event) {}

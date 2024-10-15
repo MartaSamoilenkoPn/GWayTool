@@ -1,16 +1,12 @@
 #include "Application.h"
-#include "Window.h"
 #include "Button.h"
+#include "Window.h"
 
 int main() {
     Application app;
 
-    Window window(800, 600);
+    Window window(800, 600, app.getDisplay());
     Button button(50, 50, 200, 50, "Click Me");
-
-    button.setOnClick([]() {
-        std::cout << "Button clicked!" << std::endl;
-    });
 
     window.addControl(&button);
     window.show();

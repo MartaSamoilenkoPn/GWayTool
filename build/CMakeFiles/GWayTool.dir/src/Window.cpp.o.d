@@ -99,9 +99,7 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/tr1/riemann_zeta.tcc /usr/include/inttypes.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
  /usr/include/wayland-version.h /usr/include/wayland-client-protocol.h \
- /usr/include/wayland-client.h /usr/include/cairo/cairo.h \
- /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
- /usr/include/cairo/cairo-deprecated.h /usr/include/c++/13/vector \
+ /usr/include/wayland-client.h /usr/include/c++/13/vector \
  /usr/include/c++/13/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
  /usr/include/c++/13/bits/new_allocator.h \
@@ -140,8 +138,7 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h /usr/include/c++/13/cstdlib \
- /home/marta/ucu/os/GWayTool/include/Color.h \
- /usr/include/wayland-client-protocol.h \
+ /home/marta/ucu/os/GWayTool/include/Events.h \
  /home/marta/ucu/os/GWayTool/include/Events.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/iosfwd \
@@ -228,4 +225,8 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
  /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
- /usr/include/linux/close_range.h
+ /usr/include/linux/close_range.h /usr/include/syscall.h \
+ /usr/include/x86_64-linux-gnu/sys/syscall.h \
+ /usr/include/x86_64-linux-gnu/asm/unistd.h \
+ /usr/include/x86_64-linux-gnu/asm/unistd_64.h \
+ /usr/include/x86_64-linux-gnu/bits/syscall.h

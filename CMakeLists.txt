@@ -10,15 +10,16 @@ find_package(PkgConfig REQUIRED)
 
 add_executable(GWayTool
     src/Application.cpp
-    src/Application.h
-        src/Control.h
-        src/Button.h
+        include/Application.h
+        include/Control.h
+        src/Control.cpp
+        include/Button.h
         src/Button.cpp
         examples/main.cpp
+        include/Window.h
         src/Window.cpp
-        src/TextField.h
-        src/Control.cpp
-        src/Events.h)
+        include/Events.h
+        include/Color.h)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")

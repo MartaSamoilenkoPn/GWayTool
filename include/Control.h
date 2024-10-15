@@ -2,21 +2,14 @@
 #define CONTROL_H
 
 #include <functional>
-#include "Color.h"
-#include <cairo/cairo.h>
-#include <wayland-client-protocol.h>
-
-struct MouseEvent;
-struct KeyboardEvent;
+#include "Events.h"
 
 class Control {
 public:
     Control(int x, int y, int width, int height);
     virtual ~Control() = default;
 
-    virtual void draw(cairo_t* cr, cairo_surface_t* surface) = 0;
-
-    virtual void setColor(Color color);
+    virtual void draw(void* shmData, int windowWidth, int windowHeight) = 0;
 
     virtual void onMouseEnter(const MouseEvent& event);
     virtual void onMouseLeave(const MouseEvent& event);

@@ -56,6 +56,13 @@ build CMakeFiles/GWayTool.dir/src/Application.cpp.o: CXX_COMPILER__GWayTool_unsc
   OBJECT_DIR = CMakeFiles/GWayTool.dir
   OBJECT_FILE_DIR = CMakeFiles/GWayTool.dir/src
 
+build CMakeFiles/GWayTool.dir/src/Control.cpp.o: CXX_COMPILER__GWayTool_unscanned_Debug /home/marta/ucu/os/GWayTool/src/Control.cpp || cmake_object_order_depends_target_GWayTool
+  DEP_FILE = CMakeFiles/GWayTool.dir/src/Control.cpp.o.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  INCLUDES = -I/home/marta/ucu/os/GWayTool/include -I/usr/include/cairo -I/usr/include/libpng16 -I/usr/include/freetype2 -I/usr/include/pixman-1 -I/home/marta/ucu/os/GWayTool/src
+  OBJECT_DIR = CMakeFiles/GWayTool.dir
+  OBJECT_FILE_DIR = CMakeFiles/GWayTool.dir/src
+
 build CMakeFiles/GWayTool.dir/src/Button.cpp.o: CXX_COMPILER__GWayTool_unscanned_Debug /home/marta/ucu/os/GWayTool/src/Button.cpp || cmake_object_order_depends_target_GWayTool
   DEP_FILE = CMakeFiles/GWayTool.dir/src/Button.cpp.o.d
   FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
@@ -77,13 +84,6 @@ build CMakeFiles/GWayTool.dir/src/Window.cpp.o: CXX_COMPILER__GWayTool_unscanned
   OBJECT_DIR = CMakeFiles/GWayTool.dir
   OBJECT_FILE_DIR = CMakeFiles/GWayTool.dir/src
 
-build CMakeFiles/GWayTool.dir/src/Control.cpp.o: CXX_COMPILER__GWayTool_unscanned_Debug /home/marta/ucu/os/GWayTool/src/Control.cpp || cmake_object_order_depends_target_GWayTool
-  DEP_FILE = CMakeFiles/GWayTool.dir/src/Control.cpp.o.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  INCLUDES = -I/home/marta/ucu/os/GWayTool/include -I/usr/include/cairo -I/usr/include/libpng16 -I/usr/include/freetype2 -I/usr/include/pixman-1 -I/home/marta/ucu/os/GWayTool/src
-  OBJECT_DIR = CMakeFiles/GWayTool.dir
-  OBJECT_FILE_DIR = CMakeFiles/GWayTool.dir/src
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target GWayTool
@@ -92,7 +92,7 @@ build CMakeFiles/GWayTool.dir/src/Control.cpp.o: CXX_COMPILER__GWayTool_unscanne
 #############################################
 # Link the executable GWayTool
 
-build GWayTool: CXX_EXECUTABLE_LINKER__GWayTool_Debug CMakeFiles/GWayTool.dir/src/Application.cpp.o CMakeFiles/GWayTool.dir/src/Button.cpp.o CMakeFiles/GWayTool.dir/examples/main.cpp.o CMakeFiles/GWayTool.dir/src/Window.cpp.o CMakeFiles/GWayTool.dir/src/Control.cpp.o | /usr/lib/x86_64-linux-gnu/libwayland-server.so /usr/lib/x86_64-linux-gnu/libwayland-egl.so /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
+build GWayTool: CXX_EXECUTABLE_LINKER__GWayTool_Debug CMakeFiles/GWayTool.dir/src/Application.cpp.o CMakeFiles/GWayTool.dir/src/Control.cpp.o CMakeFiles/GWayTool.dir/src/Button.cpp.o CMakeFiles/GWayTool.dir/examples/main.cpp.o CMakeFiles/GWayTool.dir/src/Window.cpp.o | /usr/lib/x86_64-linux-gnu/libwayland-server.so /usr/lib/x86_64-linux-gnu/libwayland-egl.so /usr/lib/x86_64-linux-gnu/libwayland-cursor.so
   FLAGS = -g
   LINK_LIBRARIES = -lwayland-client  /usr/lib/x86_64-linux-gnu/libwayland-server.so  /usr/lib/x86_64-linux-gnu/libwayland-egl.so  /usr/lib/x86_64-linux-gnu/libwayland-cursor.so  -lcairo  -lEGL
   OBJECT_DIR = CMakeFiles/GWayTool.dir
