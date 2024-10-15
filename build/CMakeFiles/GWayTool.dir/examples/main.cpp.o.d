@@ -208,5 +208,4 @@ CMakeFiles/GWayTool.dir/examples/main.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h \
- /home/marta/ucu/os/GWayTool/src/Events.h \
  /home/marta/ucu/os/GWayTool/src/Button.h

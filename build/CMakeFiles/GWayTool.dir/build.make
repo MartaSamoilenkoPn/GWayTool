@@ -83,10 +83,24 @@ CMakeFiles/GWayTool.dir/src/Application.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GWayTool.dir/src/Application.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/marta/ucu/os/GWayTool/src/Application.cpp -o CMakeFiles/GWayTool.dir/src/Application.cpp.s
 
+CMakeFiles/GWayTool.dir/src/Control.cpp.o: CMakeFiles/GWayTool.dir/flags.make
+CMakeFiles/GWayTool.dir/src/Control.cpp.o: /home/marta/ucu/os/GWayTool/src/Control.cpp
+CMakeFiles/GWayTool.dir/src/Control.cpp.o: CMakeFiles/GWayTool.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/GWayTool.dir/src/Control.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GWayTool.dir/src/Control.cpp.o -MF CMakeFiles/GWayTool.dir/src/Control.cpp.o.d -o CMakeFiles/GWayTool.dir/src/Control.cpp.o -c /home/marta/ucu/os/GWayTool/src/Control.cpp
+
+CMakeFiles/GWayTool.dir/src/Control.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GWayTool.dir/src/Control.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/marta/ucu/os/GWayTool/src/Control.cpp > CMakeFiles/GWayTool.dir/src/Control.cpp.i
+
+CMakeFiles/GWayTool.dir/src/Control.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GWayTool.dir/src/Control.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/marta/ucu/os/GWayTool/src/Control.cpp -o CMakeFiles/GWayTool.dir/src/Control.cpp.s
+
 CMakeFiles/GWayTool.dir/src/Button.cpp.o: CMakeFiles/GWayTool.dir/flags.make
 CMakeFiles/GWayTool.dir/src/Button.cpp.o: /home/marta/ucu/os/GWayTool/src/Button.cpp
 CMakeFiles/GWayTool.dir/src/Button.cpp.o: CMakeFiles/GWayTool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/GWayTool.dir/src/Button.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/GWayTool.dir/src/Button.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GWayTool.dir/src/Button.cpp.o -MF CMakeFiles/GWayTool.dir/src/Button.cpp.o.d -o CMakeFiles/GWayTool.dir/src/Button.cpp.o -c /home/marta/ucu/os/GWayTool/src/Button.cpp
 
 CMakeFiles/GWayTool.dir/src/Button.cpp.i: cmake_force
@@ -100,7 +114,7 @@ CMakeFiles/GWayTool.dir/src/Button.cpp.s: cmake_force
 CMakeFiles/GWayTool.dir/examples/main.cpp.o: CMakeFiles/GWayTool.dir/flags.make
 CMakeFiles/GWayTool.dir/examples/main.cpp.o: /home/marta/ucu/os/GWayTool/examples/main.cpp
 CMakeFiles/GWayTool.dir/examples/main.cpp.o: CMakeFiles/GWayTool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/GWayTool.dir/examples/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/GWayTool.dir/examples/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GWayTool.dir/examples/main.cpp.o -MF CMakeFiles/GWayTool.dir/examples/main.cpp.o.d -o CMakeFiles/GWayTool.dir/examples/main.cpp.o -c /home/marta/ucu/os/GWayTool/examples/main.cpp
 
 CMakeFiles/GWayTool.dir/examples/main.cpp.i: cmake_force
@@ -114,7 +128,7 @@ CMakeFiles/GWayTool.dir/examples/main.cpp.s: cmake_force
 CMakeFiles/GWayTool.dir/src/Window.cpp.o: CMakeFiles/GWayTool.dir/flags.make
 CMakeFiles/GWayTool.dir/src/Window.cpp.o: /home/marta/ucu/os/GWayTool/src/Window.cpp
 CMakeFiles/GWayTool.dir/src/Window.cpp.o: CMakeFiles/GWayTool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/GWayTool.dir/src/Window.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/GWayTool.dir/src/Window.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GWayTool.dir/src/Window.cpp.o -MF CMakeFiles/GWayTool.dir/src/Window.cpp.o.d -o CMakeFiles/GWayTool.dir/src/Window.cpp.o -c /home/marta/ucu/os/GWayTool/src/Window.cpp
 
 CMakeFiles/GWayTool.dir/src/Window.cpp.i: cmake_force
@@ -125,36 +139,22 @@ CMakeFiles/GWayTool.dir/src/Window.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GWayTool.dir/src/Window.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/marta/ucu/os/GWayTool/src/Window.cpp -o CMakeFiles/GWayTool.dir/src/Window.cpp.s
 
-CMakeFiles/GWayTool.dir/src/Control.cpp.o: CMakeFiles/GWayTool.dir/flags.make
-CMakeFiles/GWayTool.dir/src/Control.cpp.o: /home/marta/ucu/os/GWayTool/src/Control.cpp
-CMakeFiles/GWayTool.dir/src/Control.cpp.o: CMakeFiles/GWayTool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/marta/ucu/os/GWayTool/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/GWayTool.dir/src/Control.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GWayTool.dir/src/Control.cpp.o -MF CMakeFiles/GWayTool.dir/src/Control.cpp.o.d -o CMakeFiles/GWayTool.dir/src/Control.cpp.o -c /home/marta/ucu/os/GWayTool/src/Control.cpp
-
-CMakeFiles/GWayTool.dir/src/Control.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GWayTool.dir/src/Control.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/marta/ucu/os/GWayTool/src/Control.cpp > CMakeFiles/GWayTool.dir/src/Control.cpp.i
-
-CMakeFiles/GWayTool.dir/src/Control.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GWayTool.dir/src/Control.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/marta/ucu/os/GWayTool/src/Control.cpp -o CMakeFiles/GWayTool.dir/src/Control.cpp.s
-
 # Object files for target GWayTool
 GWayTool_OBJECTS = \
 "CMakeFiles/GWayTool.dir/src/Application.cpp.o" \
+"CMakeFiles/GWayTool.dir/src/Control.cpp.o" \
 "CMakeFiles/GWayTool.dir/src/Button.cpp.o" \
 "CMakeFiles/GWayTool.dir/examples/main.cpp.o" \
-"CMakeFiles/GWayTool.dir/src/Window.cpp.o" \
-"CMakeFiles/GWayTool.dir/src/Control.cpp.o"
+"CMakeFiles/GWayTool.dir/src/Window.cpp.o"
 
 # External object files for target GWayTool
 GWayTool_EXTERNAL_OBJECTS =
 
 GWayTool: CMakeFiles/GWayTool.dir/src/Application.cpp.o
+GWayTool: CMakeFiles/GWayTool.dir/src/Control.cpp.o
 GWayTool: CMakeFiles/GWayTool.dir/src/Button.cpp.o
 GWayTool: CMakeFiles/GWayTool.dir/examples/main.cpp.o
 GWayTool: CMakeFiles/GWayTool.dir/src/Window.cpp.o
-GWayTool: CMakeFiles/GWayTool.dir/src/Control.cpp.o
 GWayTool: CMakeFiles/GWayTool.dir/build.make
 GWayTool: /usr/lib/x86_64-linux-gnu/libwayland-client.so
 GWayTool: /usr/lib/x86_64-linux-gnu/libwayland-server.so
