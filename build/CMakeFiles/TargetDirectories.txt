@@ -1,3 +1,0 @@
-/home/marta/ucu/os/GWayTool/build/CMakeFiles/GWayTool.dir
-/home/marta/ucu/os/GWayTool/build/CMakeFiles/edit_cache.dir
-/home/marta/ucu/os/GWayTool/build/CMakeFiles/rebuild_cache.dir

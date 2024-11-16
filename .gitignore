@@ -1,4 +1,4 @@
-build/
+.build/
 
 # CMake build and generated files
 CMakeFiles/
