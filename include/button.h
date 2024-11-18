@@ -1,6 +1,7 @@
 #include <functional>
 #include <string>
 #include <iostream>
+#pragma once
 
 struct Button {
     int x, y, width, height;

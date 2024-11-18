@@ -43,7 +43,11 @@ message("Wayland include directories: ${WAYLAND_INCLUDE_DIRS}")
 add_executable(GWayTool examples/main.cpp
         ${XDG_CODE}
         ${XDG_HEADER}
-        include/WaylandFramework.h
+        include/application.h
+        include/surface.h
+        include/context.h
+        include/renderer.h
+        include/display.h
         src/WaylandFramework.cpp
 )
 

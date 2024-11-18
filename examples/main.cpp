@@ -1,4 +1,4 @@
-#include "WaylandFramework.h"
+#include "application.h"
 #include <iostream>
 
 int main() {

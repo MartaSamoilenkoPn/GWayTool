@@ -1,10 +1,11 @@
-#include "WaylandFramework.h"
+#include "surface.h"
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
 #include <xdg-shell-client-protocol.h>
 #include <linux/input-event-codes.h>
+#include "application.h"
 
 static int pointer_x = 0;
 static int pointer_y = 0;
