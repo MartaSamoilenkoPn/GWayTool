@@ -36,6 +36,47 @@ WaylandDisplay::~WaylandDisplay() {
     std::cout << "Disconnected from Wayland display.\n";
 }
 
+const struct wl_pointer_listener WaylandDisplay::pointer_listener = {
+        .enter = WaylandDisplay::pointerEnterHandler,
+        .leave = WaylandDisplay::pointerLeaveHandler,
+        .motion = WaylandDisplay::pointerMotionHandler,
+        .button = WaylandDisplay::pointerButtonHandler,
+        .axis = WaylandDisplay::pointerAxisHandler,
+};
+
+void WaylandDisplay::pointerMotionHandler(void* data, struct wl_pointer* pointer,
+                                          uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+    auto* app = static_cast<WaylandApplication*>(data);
+    app->updatePointerPosition(wl_fixed_to_int(surface_x), wl_fixed_to_int(surface_y));
+}
+
+void WaylandDisplay::pointerButtonHandler(void* data, struct wl_pointer* pointer,
+                                          uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
+    if (button == BTN_LEFT && state == WL_POINTER_BUTTON_STATE_PRESSED) {
+        auto* app = static_cast<WaylandApplication*>(data);
+        app->handlePointerClick(app->getPointerX(), app->getPointerY());
+    }
+}
+
+void WaylandDisplay::pointerEnterHandler(void* data, struct wl_pointer* pointer,
+                                         uint32_t serial, struct wl_surface* surface,
+                                         wl_fixed_t surface_x, wl_fixed_t surface_y) {
+    std::cout << "Pointer entered surface at (" << wl_fixed_to_int(surface_x)
+              << ", " << wl_fixed_to_int(surface_y) << ").\n";
+}
+
+void WaylandDisplay::pointerLeaveHandler(void* data, struct wl_pointer* pointer,
+                                         uint32_t serial, struct wl_surface* surface) {
+    std::cout << "Pointer left surface.\n";
+}
+
+void WaylandDisplay::pointerAxisHandler(void* data, struct wl_pointer* pointer,
+                                        uint32_t time, uint32_t axis, wl_fixed_t value) {
+    std::cout << "Pointer axis event: axis = " << axis
+              << ", value = " << wl_fixed_to_double(value) << "\n";
+}
+
+
 void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
                                       uint32_t id, const char* interface, uint32_t version) {
     auto* self = static_cast<WaylandDisplay*>(data);
@@ -43,6 +84,11 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
     if (strcmp(interface, "wl_compositor") == 0) {
         self->compositor = static_cast<wl_compositor*>(
             wl_registry_bind(registry, id, &wl_compositor_interface, 4));
+    } else if (strcmp(interface, "wl_seat") == 0) {
+        self->seat = static_cast<wl_seat *>(
+                wl_registry_bind(registry, id, &wl_seat_interface, 1));
+        self->pointer = wl_seat_get_pointer(self->seat);
+        wl_pointer_add_listener(self->pointer, &WaylandDisplay::pointer_listener, self);
     } else if (strcmp(interface, "xdg_wm_base") == 0) {
         self->xdg_wm_base = static_cast<struct xdg_wm_base*>(
             wl_registry_bind(registry, id, &xdg_wm_base_interface, 1));
@@ -233,6 +279,32 @@ void CairoRenderer::drawText(const std::string& text, int x, int y, double r, do
     cairo_destroy(cr);
 }
 
+void CairoRenderer::drawButton(const Button& button) {
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    // Draw button background
+    cairo_set_source_rgb(cr, 0.2, 0.2, 0.8); // Blue background
+    cairo_rectangle(cr, button.x, button.y, button.width, button.height);
+    cairo_fill(cr);
+
+    // Draw button label
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // White text
+    cairo_select_font_face(cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size(cr, 20);
+
+    cairo_text_extents_t extents;
+    cairo_text_extents(cr, button.label.c_str(), &extents);
+    int text_x = button.x + (button.width - extents.width) / 2 - extents.x_bearing;
+    int text_y = button.y + (button.height - extents.height) / 2 - extents.y_bearing;
+
+    cairo_move_to(cr, text_x, text_y);
+    cairo_show_text(cr, button.label.c_str());
+
+    cairo_gl_surface_swapbuffers(cairo_surface);  // Swap the buffer
+    cairo_surface_flush(cairo_surface);           // Explicitly flush the surface
+    cairo_destroy(cr);
+}
+
 // -------------------- WaylandApplication Implementation --------------------
 
 WaylandApplication::WaylandApplication()
@@ -252,8 +324,52 @@ WaylandApplication::~WaylandApplication() {
     std::cout << "WaylandApplication resources cleaned up.\n";
 }
 
+void WaylandApplication::handlePointerClick(int px, int py) {
+    std::cout << "Handling pointer click at (" << px << ", " << py << ")\n";
+
+    std::cout << "Total buttons: " << buttons.size() << std::endl;
+
+
+    // Check if there are buttons to process
+    if (buttons.empty()) {
+        std::cerr << "Error: No buttons available to process click!\n";
+        return;
+    }
+
+    for (size_t i = 0; i < buttons.size(); ++i) {
+        const auto& button = buttons[i];
+
+        std::cout << "Checking button " << i << ": (" << button.x << ", " << button.y
+                  << "), size: (" << button.width << "x" << button.height << ")\n";
+
+        if (button.isInside(px, py)) {
+            std::cout << "Button clicked: " << button.label << "\n";
+
+            // Check if the onClick is valid
+            if (button.onClick) {
+                std::cout << "Executing onClick for button: " << button.label << std::endl;
+                button.onClick();  // Safely invoke the callback
+            } else {
+                std::cerr << "Error: onClick callback is null for button: " << button.label << std::endl;
+            }
+            return;
+        }
+    }
+}
+
 void WaylandApplication::run() {
+
     std::cout << "Application running...\n";
+    buttons.emplace_back(Button{100, 300, 200, 50, "Click Me", []() {
+        std::cout << "Button clicked!\n";
+    }});
+
+    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+
+
+    for (const auto& button : buttons) {
+        renderer.drawButton(button);
+    }
 
     renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
