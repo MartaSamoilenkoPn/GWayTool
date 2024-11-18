@@ -88,7 +88,27 @@ public:
     ~CairoRenderer();
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
-    void draw();
+    void draw() {
+        cairo_t* cr = cairo_create(cairo_surface);
+
+        // Clear background with the current color
+        cairo_set_source_rgb(cr, bg_r, bg_g, bg_b);
+        cairo_paint(cr);
+
+        // Draw buttons
+        for (const auto& button : buttons) {
+            button.draw(cr);
+        }
+
+        cairo_gl_surface_swapbuffers(cairo_surface);
+        cairo_destroy(cr);
+    }
+
+    void setBackgroundColor(double r, double g, double b) {
+        bg_r = r;
+        bg_g = g;
+        bg_b = b;
+    }
     void addButton(const Button& button);
     void handleClick(int x, int y);
 
@@ -96,6 +116,7 @@ private:
     cairo_device_t* cairo_device;
     cairo_surface_t* cairo_surface;
     std::vector<Button> buttons;
+    double bg_r = 0.5, bg_g = 0.5, bg_b = 0.5;
 };
 
 class WaylandApplication {

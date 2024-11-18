@@ -52,14 +52,23 @@ static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_
     std::cout << "Pointer moved to: (" << pointer_x << ", " << pointer_y << ")\n";
 }
 
+static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
+    // Placeholder for frame event handling
+    std::cout << "Pointer frame event received.\n";
+}
+
+
 // Pointer listener
 static const struct wl_pointer_listener pointer_listener = {
         .enter = pointerEnterHandler,
         .leave = pointerLeaveHandler,
         .motion = pointerMotionHandler,
         .button = pointerButtonHandler,
-        .axis = pointerAxisHandler
+        .axis = pointerAxisHandler,
+        .frame = pointerFrameHandler,
+
 };
+
 
 
 
@@ -307,21 +316,21 @@ void CairoRenderer::addButton(const Button& button) {
     buttons.push_back(button);
 }
 
-void CairoRenderer::draw() {
-    cairo_t* cr = cairo_create(cairo_surface);
-
-    // Clear background
-    cairo_set_source_rgb(cr, 0.5, 0.5, 0.5); // Gray
-    cairo_paint(cr);
-
-    // Draw buttons
-    for (const auto& button : buttons) {
-        button.draw(cr);
-    }
-
-    cairo_gl_surface_swapbuffers(cairo_surface);
-    cairo_destroy(cr);
-}
+//void CairoRenderer::draw() {
+//    cairo_t* cr = cairo_create(cairo_surface);
+//
+//    // Clear background
+//    cairo_set_source_rgb(cr, 0.5, 0.5, 0.5); // Gray
+//    cairo_paint(cr);
+//
+//    // Draw buttons
+//    for (const auto& button : buttons) {
+//        button.draw(cr);
+//    }
+//
+//    cairo_gl_surface_swapbuffers(cairo_surface);
+//    cairo_destroy(cr);
+//}
 
 void CairoRenderer::handleClick(int x, int y) {
     for (const auto& button : buttons) {
@@ -362,15 +371,12 @@ void WaylandApplication::run() {
 
     renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
-    renderer.addButton({100, 100, 150, 50, "Click Me!", []() {
-        std::cout << "Button clicked!" << std::endl;
+    renderer.addButton({100, 200, 150, 50, "Change Color", [this]() {
+        renderer.setBackgroundColor(0.0, 0.5, 0.8); // Set to a light blue color
+        renderer.draw(); // Redraw with the new background
+        std::cout << "Background color changed!" << std::endl;
     }});
 
-    renderer.addButton({300, 100, 150, 50, "Quit", [this]() {
-        std::cout << "Exiting application." << std::endl;
-        wl_display_disconnect(display.getDisplay());
-        exit(0);
-    }});
 
     renderer.draw();
 
