@@ -8,6 +8,9 @@
 #include <cairo/cairo-gl.h>
 #include <xdg-shell-client-protocol.h>
 #include <string>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-compose.h>
+
 
 class WaylandDisplay {
 public:
@@ -25,7 +28,6 @@ private:
     struct wl_registry* registry;
     struct wl_compositor* compositor;
     struct xdg_wm_base* xdg_wm_base;
-
     static void registryHandler(void* data, struct wl_registry* registry,
                                 uint32_t id, const char* interface, uint32_t version);
     static void registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id);
@@ -95,6 +97,8 @@ public:
     ~WaylandApplication();
 
     void run();
+    static const struct wl_keyboard_listener keyboard_listener;
+
 
 private:
     WaylandDisplay display;
@@ -103,6 +107,19 @@ private:
     struct wl_egl_window* egl_window;
     EGLSurface egl_surface;
     CairoRenderer renderer;
+
+    std::string input_text;
+
+    struct xkb_context* xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    struct xkb_keymap* xkbKeymap = nullptr;
+    struct xkb_state* xkbState = nullptr;
+
+
+    static void keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
+                                   uint32_t serial, uint32_t time, uint32_t key,
+                                   uint32_t state);
+
+
 };
 
 #endif // WAYLAND_FRAMEWORK_H
