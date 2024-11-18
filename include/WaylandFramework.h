@@ -9,7 +9,6 @@
 #include <xdg-shell-client-protocol.h>
 #include <string>
 #include "button.h"
-#include <linux/input-event-codes.h>
 
 class WaylandDisplay {
 public:
@@ -20,35 +19,21 @@ public:
     struct wl_compositor* getCompositor() const { return compositor; }
     struct xdg_wm_base* getXdgWmBase() const { return xdg_wm_base; }
 
+
     void roundtrip();
+    static void pointerButtonHandler(void* data, struct wl_pointer* pointer,
+                                     uint32_t serial, uint32_t time, uint32_t button,
+                                     uint32_t state);
 
 private:
     struct wl_display* display;
     struct wl_registry* registry;
     struct wl_compositor* compositor;
     struct xdg_wm_base* xdg_wm_base;
-    static const struct wl_pointer_listener pointer_listener;
-    wl_seat* seat = nullptr;
-    wl_pointer* pointer = nullptr;
 
     static void registryHandler(void* data, struct wl_registry* registry,
                                 uint32_t id, const char* interface, uint32_t version);
     static void registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id);
-    static void pointerMotionHandler(void* data, struct wl_pointer* pointer,
-                                     uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y);
-    static void pointerButtonHandler(void* data, struct wl_pointer* pointer,
-                                     uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
-
-    static void pointerEnterHandler(void* data, struct wl_pointer* pointer,
-                                    uint32_t serial, struct wl_surface* surface,
-                                    wl_fixed_t surface_x, wl_fixed_t surface_y);
-    static void pointerLeaveHandler(void* data, struct wl_pointer* pointer,
-                                    uint32_t serial, struct wl_surface* surface);
-
-    static void pointerAxisHandler(void* data, struct wl_pointer* pointer,
-                                   uint32_t time, uint32_t axis, wl_fixed_t value);
-
-
     static const struct wl_registry_listener registry_listener;
 
 
@@ -103,11 +88,14 @@ public:
     ~CairoRenderer();
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
-    void drawButton(const Button& button);
+    void draw();
+    void addButton(const Button& button);
+    void handleClick(int x, int y);
 
 private:
     cairo_device_t* cairo_device;
     cairo_surface_t* cairo_surface;
+    std::vector<Button> buttons;
 };
 
 class WaylandApplication {
@@ -116,18 +104,7 @@ public:
     ~WaylandApplication();
 
     void run();
-    void handlePointerClick(int px, int py);
-    std::vector<Button> buttons;
-
-
-    void updatePointerPosition(int x, int y) {
-        pointer_x = x;
-        pointer_y = y;
-    }
-
-    int getPointerX() const { return pointer_x; }
-    int getPointerY() const { return pointer_y; }
-
+    void onMouseClick(int x, int y);
 
 private:
     WaylandDisplay display;
@@ -136,9 +113,6 @@ private:
     struct wl_egl_window* egl_window;
     EGLSurface egl_surface;
     CairoRenderer renderer;
-    int pointer_x = 0;
-    int pointer_y = 0;
-
 };
 
 #endif // WAYLAND_FRAMEWORK_H
