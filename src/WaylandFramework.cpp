@@ -28,21 +28,18 @@ static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t
     std::cout << "Pointer left the surface.\n";
 }
 
-// Handler for pointer button event
 static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
     std::cout << "Button " << button << " " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
 }
 
-// Handler for pointer axis (scroll) event
 static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                uint32_t axis, wl_fixed_t value) {
     const char* axis_str = (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) ? "vertical" : "horizontal";
     std::cout << "Scroll " << axis_str << " by " << wl_fixed_to_double(value) << "\n";
 }
 
-// Handler for pointer motion event
 static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                  wl_fixed_t x, wl_fixed_t y) {
     std::cout << "Raw motion coordinates: x=" << x << ", y=" << y << "\n";
@@ -53,12 +50,10 @@ static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_
 }
 
 static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
-    // Placeholder for frame event handling
     std::cout << "Pointer frame event received.\n";
 }
 
 
-// Pointer listener
 static const struct wl_pointer_listener pointer_listener = {
         .enter = pointerEnterHandler,
         .leave = pointerLeaveHandler,
@@ -66,11 +61,7 @@ static const struct wl_pointer_listener pointer_listener = {
         .button = pointerButtonHandler,
         .axis = pointerAxisHandler,
         .frame = pointerFrameHandler,
-
 };
-
-
-
 
 WaylandDisplay::WaylandDisplay() {
     display = wl_display_connect(NULL);
@@ -312,35 +303,15 @@ void CairoRenderer::drawText(const std::string& text, int x, int y, double r, do
     cairo_destroy(cr);
 }
 
-void CairoRenderer::addButton(const Button& button) {
-    buttons.push_back(button);
-}
+void CairoRenderer::draw() {
+    cairo_t* cr = cairo_create(cairo_surface);
 
-//void CairoRenderer::draw() {
-//    cairo_t* cr = cairo_create(cairo_surface);
-//
-//    // Clear background
-//    cairo_set_source_rgb(cr, 0.5, 0.5, 0.5); // Gray
-//    cairo_paint(cr);
-//
-//    // Draw buttons
-//    for (const auto& button : buttons) {
-//        button.draw(cr);
-//    }
-//
-//    cairo_gl_surface_swapbuffers(cairo_surface);
-//    cairo_destroy(cr);
-//}
-
-void CairoRenderer::handleClick(int x, int y) {
     for (const auto& button : buttons) {
-        if (button.contains(x, y)) {
-            if (button.onClick) {
-                button.onClick();
-            }
-            break;
-        }
+        button.draw(cr);
     }
+
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
 }
 
 // -------------------- WaylandApplication Implementation --------------------
@@ -371,16 +342,12 @@ void WaylandApplication::run() {
 
     renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
-    renderer.addButton({100, 200, 150, 50, "Change Color", [this]() {
-        renderer.setBackgroundColor(0.0, 0.5, 0.8); // Set to a light blue color
-        renderer.draw(); // Redraw with the new background
-        std::cout << "Background color changed!" << std::endl;
+    renderer.addButton({100, 200, 150, 50, "Press Me", [this]() {
+        std::cout << "Button pressed" << std::endl;
     }});
 
 
-    renderer.draw();
-
     while (wl_display_dispatch(display.getDisplay()) != -1) {
-        // Main event loop
+        renderer.draw();
     }
 }

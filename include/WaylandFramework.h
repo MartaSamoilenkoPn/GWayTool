@@ -88,29 +88,26 @@ public:
     ~CairoRenderer();
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
-    void draw() {
-        cairo_t* cr = cairo_create(cairo_surface);
 
-        // Clear background with the current color
-        cairo_set_source_rgb(cr, bg_r, bg_g, bg_b);
-        cairo_paint(cr);
 
-        // Draw buttons
+    void addButton(const Button& button) {
+        buttons.push_back(button);
+    }
+
+    void handleClick(int x, int y) {
         for (const auto& button : buttons) {
-            button.draw(cr);
+            if (button.contains(x, y)) {
+                if (button.onClick) {
+                    button.onClick();
+                }
+                break;
+            }
         }
-
-        cairo_gl_surface_swapbuffers(cairo_surface);
-        cairo_destroy(cr);
     }
 
-    void setBackgroundColor(double r, double g, double b) {
-        bg_r = r;
-        bg_g = g;
-        bg_b = b;
-    }
-    void addButton(const Button& button);
-    void handleClick(int x, int y);
+    void draw();
+
+//    void handleClick(int x, int y);
 
 private:
     cairo_device_t* cairo_device;
