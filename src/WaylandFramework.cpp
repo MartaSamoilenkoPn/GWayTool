@@ -241,6 +241,30 @@ void CairoRenderer::drawText(const std::string& text, int x, int y, double r, do
     cairo_destroy(cr);
 }
 
+void CairoRenderer::drawImage(const std::string& imagePath, int x, int y, double scaleX, double scaleY) {
+    cairo_surface_t* image_surface = cairo_image_surface_create_from_png(imagePath.c_str());
+
+    if (cairo_surface_status(image_surface) != CAIRO_STATUS_SUCCESS) {
+        std::cerr << "Check the path to the image and check if it is a .png format" << std::endl;
+        return;
+    }
+
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    cairo_save(cr);
+    cairo_translate(cr, x, y);
+    cairo_scale(cr, scaleX, scaleY);
+
+    cairo_set_source_surface(cr, image_surface, 0, 0);
+    cairo_paint(cr);
+
+    cairo_restore(cr);
+
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+    cairo_surface_destroy(image_surface);
+}
+
 // -------------------- WaylandApplication Implementation --------------------
 
 WaylandApplication::WaylandApplication()
@@ -323,7 +347,8 @@ WaylandApplication::~WaylandApplication() {
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
-    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+//    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
         // Main event loop

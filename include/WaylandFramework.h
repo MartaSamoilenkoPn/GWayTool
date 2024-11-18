@@ -85,6 +85,7 @@ public:
     ~CairoRenderer();
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
+    void drawImage(const std::string& imagePath, int x, int y, double scaleX, double scaleY);
 
 private:
     cairo_device_t* cairo_device;
