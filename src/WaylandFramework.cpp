@@ -23,7 +23,6 @@ static void pointerEnterHandler(void* data, struct wl_pointer* pointer, uint32_t
     std::cout << "Pointer entered surface at: (" << pointer_x << ", " << pointer_y << ")\n";
 }
 
-// Handler for pointer leave event
 static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                 struct wl_surface* surface) {
     std::cout << "Pointer left the surface.\n";
@@ -32,7 +31,7 @@ static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t
 static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
-    std::cout << "Button " << button << " " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
+    std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
 }
 
 static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
@@ -51,7 +50,8 @@ static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_
 }
 
 static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
-    std::cout << "Pointer frame event received.\n";
+//    std::cout << "Pointer frame event received.\n";
+    std::cout << std::endl;
 }
 
 
@@ -304,7 +304,7 @@ void CairoRenderer::drawText(const std::string& text, int x, int y, double r, do
     cairo_destroy(cr);
 }
 
-void CairoRenderer::draw() {
+void CairoRenderer::drawButton() {
     cairo_t* cr = cairo_create(cairo_surface);
 
     for (const auto& button : buttons) {
@@ -341,14 +341,19 @@ WaylandApplication::~WaylandApplication() {
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
-    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+//    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
-    renderer.addButton({100, 200, 150, 50, "Press Me", [this]() {
+    renderer.addButton({100, 200, 150, 50, "Button number 1", [this]() {
         std::cout << "Button pressed" << std::endl;
     }});
 
+    renderer.addButton({300, 200, 150, 50, "Button number 2", [this]() {
+        std::cout << "Button pressed" << std::endl;
+    }});
+
+    renderer.drawButton();
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
-        renderer.draw();
+
     }
 }

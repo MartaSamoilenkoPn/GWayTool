@@ -13,7 +13,7 @@ struct Button {
     }
 
     void draw(cairo_t* cr) const {
-        cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
+        cairo_set_source_rgb(cr, 0.8, 0.6, 0.9);
         cairo_rectangle(cr, x, y, width, height);
         cairo_fill(cr);
 

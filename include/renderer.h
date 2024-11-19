@@ -25,7 +25,7 @@ public:
         }
     }
 
-    void draw();
+    void drawButton();
 
 //    void handleClick(int x, int y);
 
