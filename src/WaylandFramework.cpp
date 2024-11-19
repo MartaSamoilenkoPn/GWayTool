@@ -229,17 +229,28 @@ CairoRenderer::~CairoRenderer() {
     std::cout << "Cairo resources released.\n";
 }
 
+
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
-    cairo_set_source_rgb(cr, r, g, b);
+
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
+    cairo_fill(cr);
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
     cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size(cr, 40);
+    cairo_set_font_size(cr, 20);
     cairo_move_to(cr, x, y);
     cairo_show_text(cr, text.c_str());
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
+    cairo_stroke(cr);
 
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
 }
+
 
 // -------------------- WaylandApplication Implementation --------------------
 
@@ -261,7 +272,7 @@ const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         },
         .leave = [](void* data, struct wl_keyboard* keyboard, uint32_t serial, struct wl_surface* surface) {
         },
-        .key = WaylandApplication::keyboardKeyHandler, // Ваш обробник клавіш
+        .key = WaylandApplication::keyboardKeyHandler,
         .modifiers = [](void* data, struct wl_keyboard* keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
         },
         .repeat_info = [](void* data, struct wl_keyboard* keyboard, int32_t rate, int32_t delay) {
@@ -295,7 +306,7 @@ void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyb
             return;
         }
 
-        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8); // Додаємо 8, щоб відповідати реальним keycode'ам.
+        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8);
         if (keysym != XKB_KEY_NoSymbol) {
             char buffer[64];
             int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
@@ -323,7 +334,7 @@ WaylandApplication::~WaylandApplication() {
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
-    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
         // Main event loop
