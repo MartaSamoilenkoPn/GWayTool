@@ -12,7 +12,6 @@
 #include <xkbcommon/xkbcommon-compose.h>
 #include <vector>
 
-
 class WaylandDisplay {
 public:
     WaylandDisplay();
