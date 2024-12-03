@@ -308,13 +308,19 @@ void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyb
 
         uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8);
         if (keysym != XKB_KEY_NoSymbol) {
-            char buffer[64];
-            int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
-            if (size > 0) {
-                buffer[size] = '\0';
-                std::cout << "Key pressed: " << buffer << " (keycode: " << key << ", keysym: " << keysym << ")" << std::endl;
+            if (keysym == XKB_KEY_BackSpace) {
+                if (!app->input_text.empty()) {
+                    app->input_text.pop_back();
+                }
+            } else {
+                char buffer[64];
+                int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
+                if (size > 0) {
+                    buffer[size] = '\0';
+                    std::cout << "Key pressed: " << buffer << " (keycode: " << key << ", keysym: " << keysym << ")" << std::endl;
 
-                app->input_text += buffer;
+                    app->input_text += buffer;
+                }
             }
         }
 

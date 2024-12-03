@@ -10,6 +10,7 @@
 #include <string>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-compose.h>
+#include <vector>
 
 
 class WaylandDisplay {
@@ -86,15 +87,20 @@ public:
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
 
+
+
 private:
     cairo_device_t* cairo_device;
     cairo_surface_t* cairo_surface;
+    cairo_t* cairo_context;
 };
 
 class WaylandApplication {
 public:
     WaylandApplication();
     ~WaylandApplication();
+
+
 
     void run();
     static const struct wl_keyboard_listener keyboard_listener;
@@ -107,6 +113,9 @@ private:
     struct wl_egl_window* egl_window;
     EGLSurface egl_surface;
     CairoRenderer renderer;
+    std::vector<std::string> lines;
+
+
 
     std::string input_text;
 
@@ -121,5 +130,6 @@ private:
 
 
 };
+
 
 #endif // WAYLAND_FRAMEWORK_H
