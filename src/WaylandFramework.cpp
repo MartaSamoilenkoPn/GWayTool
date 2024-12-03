@@ -1,16 +1,69 @@
-#include "WaylandFramework.h"
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
 #include <xdg-shell-client-protocol.h>
+#include <linux/input-event-codes.h>
+#include "application.h"
+
+static int pointer_x = 0;
+static int pointer_y = 0;
+
 #include <xkbcommon/xkbcommon.h>
 struct wl_seat* seat = nullptr;
 struct wl_keyboard* keyboard = nullptr;
 // -------------------- WaylandDisplay Implementation --------------------
 const struct wl_registry_listener WaylandDisplay::registry_listener = {
-        .global = WaylandDisplay::registryHandler,
-        .global_remove = WaylandDisplay::registryRemoveHandler,
+    .global = WaylandDisplay::registryHandler,
+    .global_remove = WaylandDisplay::registryRemoveHandler,
+};
+
+static void pointerEnterHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
+                                struct wl_surface* surface, wl_fixed_t x, wl_fixed_t y) {
+    pointer_x = wl_fixed_to_int(x);
+    pointer_y = wl_fixed_to_int(y);
+    std::cout << "Pointer entered surface at: (" << pointer_x << ", " << pointer_y << ")\n";
+}
+
+static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
+                                struct wl_surface* surface) {
+    std::cout << "Pointer left the surface.\n";
+}
+
+static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
+                                 uint32_t time, uint32_t button, uint32_t state) {
+    const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
+    std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
+}
+
+static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
+                               uint32_t axis, wl_fixed_t value) {
+    const char* axis_str = (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) ? "vertical" : "horizontal";
+    std::cout << "Scroll " << axis_str << " by " << wl_fixed_to_double(value) << "\n";
+}
+
+static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_t time,
+                                 wl_fixed_t x, wl_fixed_t y) {
+    std::cout << "Raw motion coordinates: x=" << x << ", y=" << y << "\n";
+
+    pointer_x = wl_fixed_to_int(x);
+    pointer_y = wl_fixed_to_int(y);
+    std::cout << "Pointer moved to: (" << pointer_x << ", " << pointer_y << ")\n";
+}
+
+static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
+//    std::cout << "Pointer frame event received.\n";
+    std::cout << std::endl;
+}
+
+
+static const struct wl_pointer_listener pointer_listener = {
+        .enter = pointerEnterHandler,
+        .leave = pointerLeaveHandler,
+        .motion = pointerMotionHandler,
+        .button = pointerButtonHandler,
+        .axis = pointerAxisHandler,
+        .frame = pointerFrameHandler,
 };
 
 WaylandDisplay::WaylandDisplay() {
@@ -38,23 +91,38 @@ WaylandDisplay::~WaylandDisplay() {
 }
 
 void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
-                                     uint32_t id, const char* interface, uint32_t version) {
+                                      uint32_t id, const char* interface, uint32_t version) {
     auto* self = static_cast<WaylandDisplay*>(data);
 
     if (strcmp(interface, "wl_compositor") == 0) {
         self->compositor = static_cast<wl_compositor*>(
-                wl_registry_bind(registry, id, &wl_compositor_interface, 4));
+            wl_registry_bind(registry, id, &wl_compositor_interface, 4));
     } else if (strcmp(interface, "xdg_wm_base") == 0) {
         self->xdg_wm_base = static_cast<struct xdg_wm_base*>(
                 wl_registry_bind(registry, id, &xdg_wm_base_interface, 1));
-    }
-    else if (strcmp(interface, "wl_seat") == 0) {
-        seat = static_cast<struct wl_seat*>(
-                wl_registry_bind(registry, id, &wl_seat_interface, version));
+    } else if (strcmp(interface, "wl_seat") == 0) {
+        struct wl_seat* seat = static_cast<wl_seat*>(wl_registry_bind(registry, id, &wl_seat_interface, version));
+        struct wl_pointer* pointer = wl_seat_get_pointer(seat);
+
         if (seat) {
             keyboard = wl_seat_get_keyboard(seat);
             wl_keyboard_add_listener(keyboard, &WaylandApplication::keyboard_listener, self);
         }
+        if (pointer) {
+            wl_pointer_add_listener(pointer, &pointer_listener, nullptr);
+        } else {
+            std::cerr << "Failed to get pointer for seat " << id << "\n";
+        }
+    }
+
+}
+
+void WaylandDisplay::pointerButtonHandler(void* data, struct wl_pointer* pointer,
+                                 uint32_t serial, uint32_t time, uint32_t button,
+                                 uint32_t state) {
+    if (state == WL_POINTER_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
+        auto* app = static_cast<WaylandApplication*>(data);
+        app->onMouseClick(pointer_x, pointer_y);
     }
 }
 
@@ -68,12 +136,12 @@ void WaylandDisplay::roundtrip() {
 
 // -------------------- WaylandSurface Implementation --------------------
 const struct xdg_surface_listener WaylandSurface::xdg_surface_listener = {
-        .configure = WaylandSurface::xdgSurfaceConfigureHandler,
+    .configure = WaylandSurface::xdgSurfaceConfigureHandler,
 };
 
 const struct xdg_toplevel_listener WaylandSurface::xdg_toplevel_listener = {
-        .configure = WaylandSurface::xdgToplevelConfigureHandler,
-        .close = WaylandSurface::xdgToplevelCloseHandler,
+    .configure = WaylandSurface::xdgToplevelConfigureHandler,
+    .close = WaylandSurface::xdgToplevelCloseHandler,
 };
 
 
@@ -133,17 +201,17 @@ void MyEGLContext::initialize(struct wl_display* display) {
     EGLint size;
 
     EGLint config_attribs[] = {
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_NONE
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
     };
 
     static const EGLint context_attribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
     };
 
     // Get the EGL display
@@ -229,7 +297,6 @@ CairoRenderer::~CairoRenderer() {
     std::cout << "Cairo resources released.\n";
 }
 
-
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
 
@@ -252,17 +319,33 @@ void CairoRenderer::drawText(const std::string& text, int x, int y, double r, do
 }
 
 
+void CairoRenderer::drawButton() {
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    for (const auto& button : buttons) {
+        button.draw(cr);
+    }
+
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
+
+
 // -------------------- WaylandApplication Implementation --------------------
 
 WaylandApplication::WaylandApplication()
-        : display(), surface(display), egl(display.getDisplay()),
-          egl_window(wl_egl_window_create(surface.getSurface(), 720, 510)),
-          egl_surface(egl.createWindowSurface(egl_window)),
-          renderer(egl, egl_surface) {
+    : display(), surface(display), egl(display.getDisplay()),
+      egl_window(wl_egl_window_create(surface.getSurface(), 720, 510)),
+      egl_surface(egl.createWindowSurface(egl_window)),
+      renderer(egl, egl_surface) {
     if (!egl_window) {
         throw std::runtime_error("Failed to create Wayland EGL window");
     }
     std::cout << "WaylandApplication initialized successfully.\n";
+}
+
+void WaylandApplication::onMouseClick(int x, int y) {
+    renderer.handleClick(x, y);
 }
 
 const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
@@ -340,7 +423,17 @@ WaylandApplication::~WaylandApplication() {
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
+//    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
     renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
+    renderer.addButton({100, 200, 150, 50, "Button number 1", [this]() {
+        std::cout << "Button pressed" << std::endl;
+    }});
+
+    renderer.addButton({300, 200, 150, 50, "Button number 2", [this]() {
+        std::cout << "Button pressed" << std::endl;
+    }});
+
+    renderer.drawButton();
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
         // Main event loop
