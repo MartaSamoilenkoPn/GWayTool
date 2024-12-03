@@ -53,6 +53,7 @@ add_executable(GWayTool examples/main.cpp
 
 target_link_libraries(GWayTool
         ${WAYLAND_LIBRARIES}
+        ${XKBCOMMON_LIBRARIES}  # Link xkbcommon
         /usr/local/lib/libcairo.so
 )
 

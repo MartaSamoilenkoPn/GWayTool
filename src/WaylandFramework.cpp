@@ -1,4 +1,3 @@
-#include "surface.h"
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
@@ -10,10 +9,13 @@
 static int pointer_x = 0;
 static int pointer_y = 0;
 
+#include <xkbcommon/xkbcommon.h>
+struct wl_seat* seat = nullptr;
+struct wl_keyboard* keyboard = nullptr;
 // -------------------- WaylandDisplay Implementation --------------------
 const struct wl_registry_listener WaylandDisplay::registry_listener = {
-        .global = WaylandDisplay::registryHandler,
-        .global_remove = WaylandDisplay::registryRemoveHandler,
+    .global = WaylandDisplay::registryHandler,
+    .global_remove = WaylandDisplay::registryRemoveHandler,
 };
 
 static void pointerEnterHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
@@ -89,12 +91,12 @@ WaylandDisplay::~WaylandDisplay() {
 }
 
 void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
-                                     uint32_t id, const char* interface, uint32_t version) {
+                                      uint32_t id, const char* interface, uint32_t version) {
     auto* self = static_cast<WaylandDisplay*>(data);
 
     if (strcmp(interface, "wl_compositor") == 0) {
         self->compositor = static_cast<wl_compositor*>(
-                wl_registry_bind(registry, id, &wl_compositor_interface, 4));
+            wl_registry_bind(registry, id, &wl_compositor_interface, 4));
     } else if (strcmp(interface, "xdg_wm_base") == 0) {
         self->xdg_wm_base = static_cast<struct xdg_wm_base*>(
                 wl_registry_bind(registry, id, &xdg_wm_base_interface, 1));
@@ -102,6 +104,10 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
         struct wl_seat* seat = static_cast<wl_seat*>(wl_registry_bind(registry, id, &wl_seat_interface, version));
         struct wl_pointer* pointer = wl_seat_get_pointer(seat);
 
+        if (seat) {
+            keyboard = wl_seat_get_keyboard(seat);
+            wl_keyboard_add_listener(keyboard, &WaylandApplication::keyboard_listener, self);
+        }
         if (pointer) {
             wl_pointer_add_listener(pointer, &pointer_listener, nullptr);
         } else {
@@ -130,12 +136,12 @@ void WaylandDisplay::roundtrip() {
 
 // -------------------- WaylandSurface Implementation --------------------
 const struct xdg_surface_listener WaylandSurface::xdg_surface_listener = {
-        .configure = WaylandSurface::xdgSurfaceConfigureHandler,
+    .configure = WaylandSurface::xdgSurfaceConfigureHandler,
 };
 
 const struct xdg_toplevel_listener WaylandSurface::xdg_toplevel_listener = {
-        .configure = WaylandSurface::xdgToplevelConfigureHandler,
-        .close = WaylandSurface::xdgToplevelCloseHandler,
+    .configure = WaylandSurface::xdgToplevelConfigureHandler,
+    .close = WaylandSurface::xdgToplevelCloseHandler,
 };
 
 
@@ -195,17 +201,17 @@ void MyEGLContext::initialize(struct wl_display* display) {
     EGLint size;
 
     EGLint config_attribs[] = {
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_NONE
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
     };
 
     static const EGLint context_attribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
     };
 
     // Get the EGL display
@@ -294,15 +300,24 @@ CairoRenderer::~CairoRenderer() {
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
 
-    cairo_set_source_rgb(cr, r, g, b);
-    cairo_select_font_face(cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size(cr, 40);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
+    cairo_fill(cr);
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size(cr, 20);
     cairo_move_to(cr, x, y);
     cairo_show_text(cr, text.c_str());
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
+    cairo_stroke(cr);
 
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
 }
+
 
 void CairoRenderer::drawButton() {
     cairo_t* cr = cairo_create(cairo_surface);
@@ -315,13 +330,14 @@ void CairoRenderer::drawButton() {
     cairo_destroy(cr);
 }
 
+
 // -------------------- WaylandApplication Implementation --------------------
 
 WaylandApplication::WaylandApplication()
-        : display(), surface(display), egl(display.getDisplay()),
-          egl_window(wl_egl_window_create(surface.getSurface(), 720, 510)),
-          egl_surface(egl.createWindowSurface(egl_window)),
-          renderer(egl, egl_surface) {
+    : display(), surface(display), egl(display.getDisplay()),
+      egl_window(wl_egl_window_create(surface.getSurface(), 720, 510)),
+      egl_surface(egl.createWindowSurface(egl_window)),
+      renderer(egl, egl_surface) {
     if (!egl_window) {
         throw std::runtime_error("Failed to create Wayland EGL window");
     }
@@ -332,6 +348,72 @@ void WaylandApplication::onMouseClick(int x, int y) {
     renderer.handleClick(x, y);
 }
 
+const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
+        .keymap = [](void* data, struct wl_keyboard* keyboard, uint32_t format, int fd, uint32_t size) {
+        },
+        .enter = [](void* data, struct wl_keyboard* keyboard, uint32_t serial, struct wl_surface* surface, struct wl_array* keys) {
+        },
+        .leave = [](void* data, struct wl_keyboard* keyboard, uint32_t serial, struct wl_surface* surface) {
+        },
+        .key = WaylandApplication::keyboardKeyHandler,
+        .modifiers = [](void* data, struct wl_keyboard* keyboard, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group) {
+        },
+        .repeat_info = [](void* data, struct wl_keyboard* keyboard, int32_t rate, int32_t delay) {
+        }
+};
+
+void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
+                                            uint32_t serial, uint32_t time,
+                                            uint32_t key, uint32_t state) {
+    auto* app = static_cast<WaylandApplication*>(data);
+
+    if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+        struct xkb_context* ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+        if (!ctx) {
+            std::cerr << "Failed to create XKB context" << std::endl;
+            return;
+        }
+
+        struct xkb_keymap* keymap = xkb_keymap_new_from_names(ctx, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
+        if (!keymap) {
+            std::cerr << "Failed to create keymap" << std::endl;
+            xkb_context_unref(ctx);
+            return;
+        }
+
+        struct xkb_state* xkb_state = xkb_state_new(keymap);
+        if (!xkb_state) {
+            std::cerr << "Failed to create XKB state" << std::endl;
+            xkb_keymap_unref(keymap);
+            xkb_context_unref(ctx);
+            return;
+        }
+
+        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8);
+        if (keysym != XKB_KEY_NoSymbol) {
+            if (keysym == XKB_KEY_BackSpace) {
+                if (!app->input_text.empty()) {
+                    app->input_text.pop_back();
+                }
+            } else {
+                char buffer[64];
+                int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
+                if (size > 0) {
+                    buffer[size] = '\0';
+                    std::cout << "Key pressed: " << buffer << " (keycode: " << key << ", keysym: " << keysym << ")" << std::endl;
+
+                    app->input_text += buffer;
+                }
+            }
+        }
+
+        xkb_state_unref(xkb_state);
+        xkb_keymap_unref(keymap);
+        xkb_context_unref(ctx);
+
+        app->renderer.drawText(app->input_text, 100, 250, 1.0, 1.0, 1.0);
+    }
+}
 
 WaylandApplication::~WaylandApplication() {
     wl_egl_window_destroy(egl_window);
@@ -342,7 +424,7 @@ void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
-
+    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
     renderer.addButton({100, 200, 150, 50, "Button number 1", [this]() {
         std::cout << "Button pressed" << std::endl;
     }});
@@ -354,6 +436,7 @@ void WaylandApplication::run() {
     renderer.drawButton();
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
-
+        // Main event loop
     }
 }
+

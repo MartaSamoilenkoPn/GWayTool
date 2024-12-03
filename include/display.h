@@ -19,7 +19,6 @@ public:
     struct wl_compositor* getCompositor() const { return compositor; }
     struct xdg_wm_base* getXdgWmBase() const { return xdg_wm_base; }
 
-
     void roundtrip();
     static void pointerButtonHandler(void* data, struct wl_pointer* pointer,
                                      uint32_t serial, uint32_t time, uint32_t button,
@@ -30,7 +29,6 @@ private:
     struct wl_registry* registry;
     struct wl_compositor* compositor;
     struct xdg_wm_base* xdg_wm_base;
-
     static void registryHandler(void* data, struct wl_registry* registry,
                                 uint32_t id, const char* interface, uint32_t version);
     static void registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id);
