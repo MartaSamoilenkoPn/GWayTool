@@ -8,6 +8,7 @@ public:
     ~CairoRenderer();
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
+    void drawImage(const std::string& imagePath, int x, int y, double scaleX, double scaleY);
     void addButton(const Button& button) {
         buttons.push_back(button);
     }
