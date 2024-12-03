@@ -21,26 +21,26 @@ add_custom_command(
         COMMAND wayland-scanner client-header ${XDG_PROTOCOL_PATH} ${XDG_HEADER}
         COMMAND wayland-scanner private-code ${XDG_PROTOCOL_PATH} ${XDG_CODE}
         DEPENDS ${XDG_PROTOCOL_PATH}
-        COMMENT "Generating xdg-shell-client-protocol.h and
-        xdg-shell-protocol.c in ${INCLUDE_DIR} and ${SOURCE_DIR}"
+        COMMENT "Generating xdg-shell-client-protocol.h and xdg-shell-protocol.c in ${INCLUDE_DIR} and ${SOURCE_DIR}"
 )
 
-# Add the directory where EGL is located
 # Use PkgConfig to find Wayland and Cairo libraries
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND REQUIRED wayland-client wayland-server wayland-egl egl)
+pkg_check_modules(XKBCOMMON REQUIRED xkbcommon)
 
-# Include directories for Wayland and Cairo
-include_directories(${WAYLAND_INCLUDE_DIRS}${CMAKE_CURRENT_SOURCE_DIR}${CMAKE_INCLUDE_CURRENT_DIR})
-include_directories("/usr/local/include/cairo")
+# Include directories for Wayland, Cairo, and xkbcommon
+include_directories(${WAYLAND_INCLUDE_DIRS})
+include_directories(${XKBCOMMON_INCLUDE_DIRS})
+include_directories("/usr/local/include/cairo" ${INCLUDE_DIR})
 
-# Link directories for Wayland and Cairo
-link_directories(${WAYLAND_LIBRARY_DIRS})
+# Link directories for Wayland, Cairo, and xkbcommon
+link_directories(${WAYLAND_LIBRARY_DIRS} ${XKBCOMMON_LIBRARY_DIRS})
 link_directories("/usr/local/lib/")
-message("Wayland include directories: ${WAYLAND_INCLUDE_DIRS}")
 
 # Define the executable
-add_executable(GWayTool examples/main.cpp
+add_executable(GWayTool
+        examples/main.cpp
         ${XDG_CODE}
         ${XDG_HEADER}
         include/application.h
@@ -51,16 +51,13 @@ add_executable(GWayTool examples/main.cpp
         src/WaylandFramework.cpp
 )
 
+# Link necessary libraries
 target_link_libraries(GWayTool
         ${WAYLAND_LIBRARIES}
         ${XKBCOMMON_LIBRARIES}  # Link xkbcommon
         /usr/local/lib/libcairo.so
 )
 
-target_include_directories(GWayTool PRIVATE ${INCLUDE_DIR})
-# Link libraries explicitly, including cairo-gobject and cairo-gl
-
 # Set compiler and linker flags from pkg-config
-target_compile_options(GWayTool PRIVATE ${WAYLAND_CFLAGS} ${CAIRO_CFLAGS})
-target_link_options(GWayTool PRIVATE ${WAYLAND_LDFLAGS} ${CAIRO_LDFLAGS})
-
+target_compile_options(GWayTool PRIVATE ${WAYLAND_CFLAGS_OTHER} ${XKBCOMMON_CFLAGS_OTHER})
+target_link_options(GWayTool PRIVATE ${WAYLAND_LDFLAGS_OTHER} ${XKBCOMMON_LDFLAGS_OTHER})
