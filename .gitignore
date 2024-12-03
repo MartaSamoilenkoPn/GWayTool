@@ -1,0 +1,12 @@
+.build/
+
+# CMake build and generated files
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# CLion specific files
+.idea/
+.idea/*
+.DS_Store          # macOS system file
+*.iml

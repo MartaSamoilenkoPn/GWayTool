@@ -1,15 +1,14 @@
-#include "Application.h"
-#include "Button.h"
-#include "Window.h"
+#include "WaylandFramework.h"
+#include <iostream>
 
 int main() {
-    Application app;
+    try {
+        WaylandApplication app;
+        app.run();
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    Window window(800, 600, app.getDisplay());
-    Button button(50, 50, 200, 50, "Click Me");
-
-    window.addControl(&button);
-    window.show();
-
-    return app.run();
+    return EXIT_SUCCESS;
 }
