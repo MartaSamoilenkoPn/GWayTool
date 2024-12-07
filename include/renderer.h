@@ -1,6 +1,7 @@
 #ifndef GWAYTOOL_RENDERER_H
 #define GWAYTOOL_RENDERER_H
 #include "context.h"
+#include "text-field.h"
 
 class CairoRenderer {
 public:
@@ -25,6 +26,7 @@ public:
     }
 
     void drawButton();
+    void drawTextInput(const TextInput &textInput);
 
 
 
@@ -35,6 +37,7 @@ private:
     cairo_t* cairo_context;
     std::vector<Button> buttons;
     double bg_r = 0.5, bg_g = 0.5, bg_b = 0.5;
+
 };
 
 

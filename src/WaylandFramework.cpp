@@ -8,6 +8,7 @@
 
 static int pointer_x = 0;
 static int pointer_y = 0;
+bool textInputAdded = false;
 
 #include <xkbcommon/xkbcommon.h>
 struct wl_seat* seat = nullptr;
@@ -34,7 +35,14 @@ static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
     std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
+    if (textInputAdded) {
+        if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
+            WaylandApplication *app = static_cast<WaylandApplication *>(data);
+            app->onMouseClick(pointer_x, pointer_y);
+        }
+    }
 }
+
 
 static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                uint32_t axis, wl_fixed_t value) {
@@ -55,7 +63,6 @@ static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
 //    std::cout << "Pointer frame event received.\n";
     std::cout << std::endl;
 }
-
 
 static const struct wl_pointer_listener pointer_listener = {
         .enter = pointerEnterHandler,
@@ -109,7 +116,7 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
             wl_keyboard_add_listener(keyboard, &WaylandApplication::keyboard_listener, self);
         }
         if (pointer) {
-            wl_pointer_add_listener(pointer, &pointer_listener, nullptr);
+            wl_pointer_add_listener(pointer, &pointer_listener, self);
         } else {
             std::cerr << "Failed to get pointer for seat " << id << "\n";
         }
@@ -117,14 +124,6 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
 
 }
 
-void WaylandDisplay::pointerButtonHandler(void* data, struct wl_pointer* pointer,
-                                 uint32_t serial, uint32_t time, uint32_t button,
-                                 uint32_t state) {
-    if (state == WL_POINTER_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
-        auto* app = static_cast<WaylandApplication*>(data);
-        app->onMouseClick(pointer_x, pointer_y);
-    }
-}
 
 void WaylandDisplay::registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id) {
     std::cout << "Global object removed: ID = " << id << "\n";
@@ -354,6 +353,13 @@ void CairoRenderer::drawButton() {
 
 
 // -------------------- WaylandApplication Implementation --------------------
+void CairoRenderer::drawTextInput(const TextInput& textInput) {
+    textInputAdded = true;
+    cairo_t* cr = cairo_create(cairo_surface);
+    textInput.draw(cr);
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
 
 WaylandApplication::WaylandApplication()
     : display(), surface(display), egl(display.getDisplay()),
@@ -366,9 +372,6 @@ WaylandApplication::WaylandApplication()
     std::cout << "WaylandApplication initialized successfully.\n";
 }
 
-void WaylandApplication::onMouseClick(int x, int y) {
-    renderer.handleClick(x, y);
-}
 
 const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .keymap = [](void* data, struct wl_keyboard* keyboard, uint32_t format, int fd, uint32_t size) {
@@ -384,56 +387,76 @@ const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         }
 };
 
+void WaylandApplication::onMouseClick(int x, int y) {
+    std::cout << "Mouse clicked at: (" << x << ", " << y << ")\n";
+
+    if (textInput.contains(x, y)) {
+        textInput.isFocused = true;
+        std::cout << "Text input focused\n";
+    } else {
+        textInput.isFocused = false;
+        std::cout << "Text input unfocused\n";
+    }
+
+    if (textInputAdded) {
+        renderer.drawTextInput(textInput);
+    }
+}
+
+
 void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
-                                            uint32_t serial, uint32_t time,
-                                            uint32_t key, uint32_t state) {
+                                            uint32_t serial, uint32_t time, uint32_t key,
+                                            uint32_t state) {
     auto* app = static_cast<WaylandApplication*>(data);
+
+    std::cout << "Keyboard event: key=" << key
+              << ", state=" << (state == WL_KEYBOARD_KEY_STATE_PRESSED ? "PRESSED" : "RELEASED")
+              << ", time=" << time << std::endl;
 
     if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
         struct xkb_context* ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
         if (!ctx) {
-            std::cerr << "Failed to create XKB context" << std::endl;
+            std::cerr << "Failed to create XKB context." << std::endl;
             return;
         }
 
         struct xkb_keymap* keymap = xkb_keymap_new_from_names(ctx, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
         if (!keymap) {
-            std::cerr << "Failed to create keymap" << std::endl;
+            std::cerr << "Failed to create XKB keymap." << std::endl;
             xkb_context_unref(ctx);
             return;
         }
 
         struct xkb_state* xkb_state = xkb_state_new(keymap);
         if (!xkb_state) {
-            std::cerr << "Failed to create XKB state" << std::endl;
+            std::cerr << "Failed to create XKB state." << std::endl;
             xkb_keymap_unref(keymap);
             xkb_context_unref(ctx);
             return;
         }
 
-        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8);
-        if (keysym != XKB_KEY_NoSymbol) {
-            if (keysym == XKB_KEY_BackSpace) {
-                if (!app->input_text.empty()) {
-                    app->input_text.pop_back();
-                }
-            } else {
-                char buffer[64];
-                int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
-                if (size > 0) {
-                    buffer[size] = '\0';
-                    std::cout << "Key pressed: " << buffer << " (keycode: " << key << ", keysym: " << keysym << ")" << std::endl;
+        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8); // Додаємо 8 для коректного keycode
+        char buffer[64];
+        int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
+        buffer[size] = '\0';
 
-                    app->input_text += buffer;
-                }
+        std::cout << "Key pressed: keysym=" << keysym
+                  << ", utf8='" << buffer << "'"
+                  << ", keycode=" << key << std::endl;
+//        app->textInput.isFocused = true;
+        if (app->textInput.isFocused) {
+            if (keysym == XKB_KEY_Escape) {
+                std::cout << "Escape key detected. Unfocusing text input." << std::endl;
+                app->textInput.isFocused = false;
+            } else {
+                app->textInput.handleKeyPress(keysym);
+                app->renderer.drawTextInput(app->textInput);
             }
         }
 
         xkb_state_unref(xkb_state);
         xkb_keymap_unref(keymap);
         xkb_context_unref(ctx);
-
-        app->renderer.drawText(app->input_text, 100, 250, 1.0, 1.0, 1.0);
     }
 }
 
@@ -458,6 +481,7 @@ void WaylandApplication::run() {
 //    }});
 //    renderer.drawButton();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
+    renderer.drawTextInput(textInput);
 
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
