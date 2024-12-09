@@ -33,6 +33,10 @@ static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t
 static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
+    if (state_str == "pressed") {
+        auto* app = static_cast<WaylandApplication*>(data);
+        app->onMouseClick(pointer_x, pointer_y);
+    }
     std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
 }
 
@@ -109,7 +113,7 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
             wl_keyboard_add_listener(keyboard, &WaylandApplication::keyboard_listener, self);
         }
         if (pointer) {
-            wl_pointer_add_listener(pointer, &pointer_listener, nullptr);
+            wl_pointer_add_listener(pointer, &pointer_listener, self);
         } else {
             std::cerr << "Failed to get pointer for seat " << id << "\n";
         }
@@ -341,15 +345,34 @@ void CairoRenderer::drawImage(const std::string& imagePath, int x, int y, double
     cairo_destroy(cr);
     cairo_surface_destroy(image_surface);
 }
+
+void CairoRenderer::handleClick(int x, int y) {
+        // just debugging
+//    std::cout << "Number of buttons: " << buttons.size() << std::endl;
+//    std::cout << "in handle click" << std::endl;
+
+    for (const Button& button : buttons) {
+//        std::cout << "it buttons" << std::endl;
+        if (button.contains(x, y)) {
+//            std::cout << "button contains" << std::endl;
+            if (button.onClick) {
+                button.onClick();
+            }
+            break;
+        }
+    }
+}
+
 void CairoRenderer::drawButton() {
     cairo_t* cr = cairo_create(cairo_surface);
 
-    for (const auto& button : buttons) {
+    for (const Button& button : buttons) {
         button.draw(cr);
     }
 
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
+
 }
 
 
@@ -367,6 +390,7 @@ WaylandApplication::WaylandApplication()
 }
 
 void WaylandApplication::onMouseClick(int x, int y) {
+    std::cout << "it goes to on mouse click" << std::endl;
     renderer.handleClick(x, y);
 }
 
@@ -442,21 +466,22 @@ WaylandApplication::~WaylandApplication() {
     std::cout << "WaylandApplication resources cleaned up.\n";
 }
 
+void sayHelloWorld(){
+    // just for testing
+    std::cout << "hello world" << std::endl;
+}
+
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
 
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
 //    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
+    Button button1(100, 200, 150, 50, "button number 1", sayHelloWorld);
+    renderer.addButton(button1);
 
-//    renderer.addButton({100, 200, 150, 50, "Button number 1", [this]() {
-//        std::cout << "Button pressed" << std::endl;
-//    }});
-//
-//    renderer.addButton({300, 200, 150, 50, "Button number 2", [this]() {
-//        std::cout << "Button pressed" << std::endl;
-//    }});
-//    renderer.drawButton();
+    renderer.drawButton();
+//    button1.click();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
 
 
