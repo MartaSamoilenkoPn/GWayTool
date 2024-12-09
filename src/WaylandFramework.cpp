@@ -9,7 +9,9 @@
 static int pointer_x = 0;
 static int pointer_y = 0;
 bool textInputAdded = false;
-
+bool isDragging = false;
+int dragOffsetX = 0;
+int dragOffsetY = 0;
 #include <xkbcommon/xkbcommon.h>
 struct wl_seat* seat = nullptr;
 struct wl_keyboard* keyboard = nullptr;
@@ -36,12 +38,14 @@ static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
     std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
     if (textInputAdded) {
+        WaylandApplication *app = static_cast<WaylandApplication *>(data);
         if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-            WaylandApplication *app = static_cast<WaylandApplication *>(data);
             app->onMouseClick(pointer_x, pointer_y);
         }
+        else if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
+            app->onMouseRelease(pointer_x, pointer_y);
     }
-}
+}}
 
 
 static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
@@ -50,14 +54,16 @@ static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t 
     std::cout << "Scroll " << axis_str << " by " << wl_fixed_to_double(value) << "\n";
 }
 
+
 static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                  wl_fixed_t x, wl_fixed_t y) {
-    std::cout << "Raw motion coordinates: x=" << x << ", y=" << y << "\n";
-
     pointer_x = wl_fixed_to_int(x);
     pointer_y = wl_fixed_to_int(y);
-    std::cout << "Pointer moved to: (" << pointer_x << ", " << pointer_y << ")\n";
+
+    WaylandApplication* app = static_cast<WaylandApplication*>(data);
+    app->onMouseMove(pointer_x, pointer_y);
 }
+
 
 static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
 //    std::cout << "Pointer frame event received.\n";
@@ -289,12 +295,28 @@ CairoRenderer::CairoRenderer(MyEGLContext& egl, EGLSurface egl_surface) {
         throw std::runtime_error("Failed to create Cairo surface");
     }
 }
-
 CairoRenderer::~CairoRenderer() {
     cairo_surface_destroy(cairo_surface);
     cairo_device_destroy(cairo_device);
     std::cout << "Cairo resources released.\n";
 }
+
+void CairoRenderer::clearArea(int x, int y, int width, int height) {
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+
+    cairo_rectangle(cr, x, y, width, height);
+    cairo_fill(cr);
+
+    cairo_destroy(cr);
+    cairo_gl_surface_swapbuffers(cairo_surface);
+}
+
+
+
+
+
 
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
@@ -386,22 +408,63 @@ const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .repeat_info = [](void* data, struct wl_keyboard* keyboard, int32_t rate, int32_t delay) {
         }
 };
+void TextInput::setX(int x) {
+    this->x = x;
+}
 
-void WaylandApplication::onMouseClick(int x, int y) {
-    std::cout << "Mouse clicked at: (" << x << ", " << y << ")\n";
+void TextInput::setY(int y) {
+    this->y = y;
+}
 
-    if (textInput.contains(x, y)) {
-        textInput.isFocused = true;
-        std::cout << "Text input focused\n";
-    } else {
-        textInput.isFocused = false;
-        std::cout << "Text input unfocused\n";
-    }
+int TextInput::getX() const {
+    return x;
+}
 
-    if (textInputAdded) {
+int TextInput::getY() const {
+    return y;
+}
+
+void WaylandApplication::onMouseRelease(int x, int y) {
+    isDragging = false;
+}
+void WaylandApplication::onMouseMove(int x, int y) {
+    if (isDragging) {
+        std::cout << "Dragging started. Mouse position: (" << x << ", " << y << ")\n";
+
+        int oldX = textInput.getX();
+        int oldY = textInput.getY();
+        std::cout << "Old position: (" << oldX << ", " << oldY << ")\n";
+
+        textInput.setX(x - dragOffsetX);
+        textInput.setY(y - dragOffsetY);
+
+        std::cout << "Clearing area: (" << oldX << ", " << oldY << ")\n";
+//        renderer.clearArea(oldX, oldY, textInput.width, textInput.height);
+        renderer.clearArea(oldX - 4, oldY - 4, textInput.width + 8, textInput.height + 8);
+
+
+        std::cout << "Drawing new position: (" << textInput.getX() << ", " << textInput.getY() << ")\n";
         renderer.drawTextInput(textInput);
     }
 }
+
+void WaylandApplication::onMouseClick(int x, int y) {
+    if (textInput.contains(x, y)) {
+        textInput.isFocused = true;
+        std::cout << "TextInput focused.\n";
+
+        if (!isDragging) {
+            isDragging = true;
+            std::cout << "Dragging initialized.\n";
+            dragOffsetX = x - textInput.getX();
+            dragOffsetY = y - textInput.getY();
+        }
+    } else {
+        textInput.isFocused = false;
+    }
+    renderer.drawTextInput(textInput);
+}
+
 
 
 void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,

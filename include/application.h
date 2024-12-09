@@ -25,7 +25,8 @@ public:
     void run();
     void onMouseClick(int x, int y);
     static const struct wl_keyboard_listener keyboard_listener;
-
+    void onMouseMove(int x, int y);
+    void onMouseRelease(int x, int y);
 private:
     WaylandDisplay display;
     WaylandSurface surface;
