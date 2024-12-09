@@ -21,8 +21,8 @@ struct TextInput {
     bool isFocused = false;
     int lineHeight = 20;
     std::vector<std::string> lines = {""};
-
     std::ofstream textFile;
+
     TextInput(int x, int y, int width, int height)
             : x(x), y(y), width(width), height(height) {
         textFile.open("output.txt", std::ios::out | std::ios::trunc);
@@ -34,7 +34,6 @@ struct TextInput {
         if (textFile.is_open()) {
             textFile.close();
         }}
-
 
     bool contains(int px, int py) const {
         return px >= x && px <= x + width && py >= y && py <= y + height;

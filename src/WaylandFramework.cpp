@@ -690,7 +690,6 @@ void WaylandApplication::run() {
 
     Button button1(20, 200, 100, 30, "Show/Hide text", showGeneralText(renderer, isTextVisible));
 
-
     std::vector<std::vector<std::string>> csvData;
     Button button2(430, 115, 70, 20, "Parse CSV", parseFile(renderer, textInput, csvData));
     Button button3(520, 115, 100, 20, "Show table", showTable(renderer, 220, 150, csvData));
@@ -739,7 +738,6 @@ void WaylandApplication::run() {
     renderer.drawButton();
 
     renderer.drawTextInput(textInput);
-
 
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
