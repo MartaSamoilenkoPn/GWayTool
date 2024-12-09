@@ -29,6 +29,10 @@ public:
     void drawLineChart(const std::vector<int>& x_values, const std::vector<int>& y_values, int x, int y, int width, int height,
                                       double r, double g, double b,
                                       const std::optional<std::string> &title);
+    void drawPieChart(const std::vector<int>& values, int x, int y, int radius,
+                                     const std::vector<std::tuple<double, double, double>>& colors,
+                                     const std::optional<std::vector<std::string>>& optionalLabels,
+                                     const std::optional<std::string>& title);
 
 private:
     cairo_device_t* cairo_device;

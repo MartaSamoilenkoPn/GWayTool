@@ -582,10 +582,23 @@ void WaylandApplication::run() {
 //    std::string title = "Test";
 //    renderer.drawBarChart(values, 100, 100, 400, 200, 0.2, 0.6, 0.8, labels, title);
 
-    std::vector<int> values_x = {10, 30, 20, 50, 40};
-    std::vector<int> values_y = {10, 30, 20, 50, 40};
-    std::optional<std::string> title = "Line Chart Example";
-    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
+//    std::vector<int> values_x = {10, 30, 20, 50, 40};
+//    std::vector<int> values_y = {10, 30, 20, 50, 40};
+//    std::optional<std::string> title = "Line Chart Example";
+//    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
+
+    std::vector<int> values = {10, 20, 30, 40};
+    std::vector<std::tuple<double, double, double>> colors = {
+            {1.0, 0.0, 0.0},
+            {0.0, 1.0, 0.0},
+            {0.0, 0.0, 1.0},
+            {1.0, 1.0, 0.0}
+    };
+
+    std::vector<std::string> labels = {"one", "two", "three", "four"};
+    std::optional<std::string> title = "Pie Chart Example";
+    renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
+
 
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {

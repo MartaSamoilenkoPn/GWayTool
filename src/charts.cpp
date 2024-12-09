@@ -1,3 +1,4 @@
+#include <numeric>
 #include "application.h"
 
 void CairoRenderer::drawBarChart(const std::vector<int>& values, int x, int y, int width, int height,
@@ -87,6 +88,7 @@ void CairoRenderer::drawBarChart(const std::vector<int>& values, int x, int y, i
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
 }
+
 
 
 void CairoRenderer::drawLineChart(const std::vector<int>& x_values, const std::vector<int>& y_values, int x, int y, int width, int height,
@@ -189,3 +191,77 @@ void CairoRenderer::drawLineChart(const std::vector<int>& x_values, const std::v
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
 }
+
+
+void CairoRenderer::drawPieChart(const std::vector<int>& values, int x, int y, int radius,
+                                 const std::vector<std::tuple<double, double, double>>& colors,
+                                 const std::optional<std::vector<std::string>>& optionalLabels,
+                                 const std::optional<std::string>& title) {
+    if (values.empty()) return;
+    if (colors.size() != values.size()) return;
+
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    int total_value = std::accumulate(values.begin(), values.end(), 0);
+    if (total_value == 0) total_value = 1;
+
+    double start_angle = 0.0;
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        double angle = (static_cast<double>(values[i]) / total_value) * 2 * M_PI;
+        double end_angle = start_angle + angle;
+
+        double r, g, b;
+        std::tie(r, g, b) = colors[i];
+        cairo_set_source_rgb(cr, r, g, b);
+
+        cairo_move_to(cr, x, y);
+        cairo_arc(cr, x, y, radius, start_angle, end_angle);
+        cairo_close_path(cr);
+        cairo_fill(cr);
+
+        start_angle = end_angle;
+    }
+
+    if (optionalLabels && !optionalLabels->empty()) {
+        start_angle = 0.0;
+        for (size_t i = 0; i < values.size(); ++i) {
+            double angle = (static_cast<double>(values[i]) / total_value) * 2 * M_PI;
+            double middle_angle = start_angle + angle / 2.0;
+
+            double label_x = x + (radius * 0.6) * cos(middle_angle);
+            double label_y = y + (radius * 0.6) * sin(middle_angle);
+
+            cairo_set_source_rgb(cr, 0.0, 0.0, 0.0); // White color for text
+            cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+            cairo_set_font_size(cr, 12);
+
+            std::string label = (*optionalLabels)[i];
+            cairo_text_extents_t extents;
+            cairo_text_extents(cr, label.c_str(), &extents);
+            cairo_move_to(cr, label_x - extents.width / 2, label_y + extents.height / 2);
+            cairo_show_text(cr, label.c_str());
+
+            start_angle += angle;
+        }
+    }
+
+    if (title && !title->empty()) {
+        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+        cairo_set_font_size(cr, 16);
+
+        cairo_text_extents_t extents;
+        cairo_text_extents(cr, title->c_str(), &extents);
+
+        double title_x = x + (radius / 2.0) - (extents.width / 2.0);
+        double title_y = y - radius - 20;
+
+        cairo_move_to(cr, title_x, title_y);
+        cairo_show_text(cr, title->c_str());
+    }
+
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
+
