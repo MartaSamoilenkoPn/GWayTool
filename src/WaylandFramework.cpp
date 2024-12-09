@@ -384,8 +384,11 @@ void CairoRenderer::drawButton() {
 void CairoRenderer::handleClickCheckBox(int x, int y) {
     for (auto& checkbox : checkboxes) {
         if (checkbox.contains(x, y)) {
-            checkbox.toggle(); // Toggle the checkbox state
-            drawCheckboxes();  // Redraw all checkboxes
+            if(checkbox.onToggle) {
+                checkbox.toggle();
+                drawCheckboxes();
+            } // Toggle the checkbox state
+              // Redraw all checkboxes
             break;
         }
     }
