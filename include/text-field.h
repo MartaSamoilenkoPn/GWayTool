@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
+#include <optional>
 #include <xdg-shell-client-protocol.h>
 #include <linux/input-event-codes.h>
 #include "application.h"
@@ -23,9 +24,10 @@ struct TextInput {
     std::vector<std::string> lines = {""};
     std::ofstream textFile;
 
-    TextInput(int x, int y, int width, int height)
+    TextInput(int x, int y, int width, int height, std::optional<std::string> filePath = std::nullopt)
             : x(x), y(y), width(width), height(height) {
-        textFile.open("output.txt", std::ios::out | std::ios::trunc);
+        std::string outputPath = filePath.value_or("output.txt");
+        textFile.open(outputPath, std::ios::out | std::ios::trunc);
         if (!textFile.is_open()) {
             throw std::runtime_error("Can't open file");
         }
