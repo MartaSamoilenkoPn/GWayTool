@@ -28,7 +28,7 @@ private:
     MyEGLContext egl;
     struct wl_egl_window* egl_window;
     EGLSurface egl_surface;
-    CairoRenderer renderer = new CairoRenderer;
+    CairoRenderer renderer;
     std::vector<std::string> lines;
 
 
