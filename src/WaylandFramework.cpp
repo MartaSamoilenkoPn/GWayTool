@@ -36,19 +36,11 @@ static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t
 static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
-//    if (!textInputAdded){
-    if (state_str == "pressed") {
-        auto* app = static_cast<WaylandApplication*>(data);
+    auto* app = static_cast<WaylandApplication*>(data);
+
+    if (state_str == "pressed" && button == BTN_LEFT) {
         app->onMouseClick(pointer_x, pointer_y);
-    }
-    std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
-//    }
-//    else {
-        WaylandApplication *app = static_cast<WaylandApplication *>(data);
-        if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-            app->onMouseClick(pointer_x, pointer_y);
-        }
-        else if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
+    }   else if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
             app->onMouseRelease(pointer_x, pointer_y);
 //    }
 }}
@@ -322,10 +314,6 @@ void CairoRenderer::clearArea(int x, int y, int width, int height) {
 }
 
 
-
-
-
-
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
 
@@ -372,14 +360,8 @@ void CairoRenderer::drawImage(const std::string& imagePath, int x, int y, double
 }
 
 void CairoRenderer::handleClick(int x, int y) {
-        // just debugging
-//    std::cout << "Number of buttons: " << buttons.size() << std::endl;
-//    std::cout << "in handle click" << std::endl;
-
     for (const Button& button : buttons) {
-//        std::cout << "it buttons" << std::endl;
         if (button.contains(x, y)) {
-//            std::cout << "button contains" << std::endl;
             if (button.onClick) {
                 button.onClick();
             }
@@ -390,14 +372,11 @@ void CairoRenderer::handleClick(int x, int y) {
 
 void CairoRenderer::drawButton() {
     cairo_t* cr = cairo_create(cairo_surface);
-
     for (const Button& button : buttons) {
         button.draw(cr);
     }
-
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
-
 }
 
 
@@ -421,11 +400,6 @@ WaylandApplication::WaylandApplication()
     std::cout << "WaylandApplication initialized successfully.\n";
 }
 
-//void WaylandApplication::onMouseClick(int x, int y) {
-//    std::cout << "it goes to on mouse click" << std::endl;
-//    renderer.handleClick(x, y);
-//}
-
 const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .keymap = [](void* data, struct wl_keyboard* keyboard, uint32_t format, int fd, uint32_t size) {
         },
@@ -439,6 +413,7 @@ const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .repeat_info = [](void* data, struct wl_keyboard* keyboard, int32_t rate, int32_t delay) {
         }
 };
+
 void TextInput::setX(int x) {
     this->x = x;
 }
@@ -458,6 +433,7 @@ int TextInput::getY() const {
 void WaylandApplication::onMouseRelease(int x, int y) {
     isDragging = false;
 }
+
 void WaylandApplication::onMouseMove(int x, int y) {
     if (isDragging) {
         std::cout << "Dragging started. Mouse position: (" << x << ", " << y << ")\n";
@@ -497,11 +473,9 @@ void WaylandApplication::onMouseClick(int x, int y) {
         renderer.drawTextInput(textInput);
     }
     else {
-        std::cout << "it goes to on mouse click" << std::endl;
         renderer.handleClick(x, y);
     }
 }
-
 
 
 void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
@@ -565,13 +539,29 @@ WaylandApplication::~WaylandApplication() {
     std::cout << "WaylandApplication resources cleaned up.\n";
 }
 
+//-----testing buttons----
 void sayHelloWorld(){
     // just for testing
     std::cout << "hello world" << std::endl;
 }
 
+std::function<void()> createTextCallback(CairoRenderer &renderer, bool &isVisible) {
+    return [&renderer, &isVisible]() {
+        if (isVisible) {
+            renderer.clearArea(50, 200, 400, 100);
+            isVisible = false;
+        } else {
+            renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+            isVisible = true;
+        }
+    };
+}
+
+
+//------app
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
+    bool isTextVisible = false;
 
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
@@ -580,9 +570,7 @@ void WaylandApplication::run() {
     Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
     renderer.addButton(button1);
 
-    renderer.drawButton();
-
-    Button button2(300, 100, 150, 50, "button number 2", sayHelloWorld);
+    Button button2(300, 100, 150, 50, "button number 2", createTextCallback(renderer, isTextVisible));
     renderer.addButton(button2);
     renderer.drawButton();
 //    button1.click();
