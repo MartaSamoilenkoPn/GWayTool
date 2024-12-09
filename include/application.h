@@ -1,18 +1,13 @@
 #ifndef GWAYTOOL_APPLICATION_H
 #define GWAYTOOL_APPLICATION_H
 
-#include "renderer.h"
-#include <wayland-client.h>
 #include <wayland-client-protocol.h>
 #include <wayland-egl.h>
 #include <EGL/egl.h>
-#include <cairo/cairo-gl.h>
-#include <xdg-shell-client-protocol.h>
 #include <string>
 #include <xkbcommon/xkbcommon.h>
-#include <xkbcommon/xkbcommon-compose.h>
 #include <vector>
-#include "button.h"
+#include "renderer.h"
 #include "text-field.h"
 
 class WaylandApplication {
@@ -33,7 +28,7 @@ private:
     MyEGLContext egl;
     struct wl_egl_window* egl_window;
     EGLSurface egl_surface;
-    CairoRenderer renderer;
+    CairoRenderer renderer = new CairoRenderer;
     std::vector<std::string> lines;
 
 

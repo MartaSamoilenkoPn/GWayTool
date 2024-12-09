@@ -1,9 +1,6 @@
-//
-// Created by anna on 12/7/24.
-//
-
 #ifndef GWAYTOOL_TEXT_FIELD_H
 #define GWAYTOOL_TEXT_FIELD_H
+
 #include "application.h"
 #include <iostream>
 #include <stdexcept>
@@ -14,9 +11,12 @@
 #include "application.h"
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
+
 struct TextInput {
     int x, y, width, height;
     bool isFocused = false;
+    bool textInputAdded = false;
+
     int lineHeight = 20;
     std::vector<std::string> lines = {""};
 

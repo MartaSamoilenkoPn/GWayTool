@@ -49,6 +49,12 @@ add_executable(GWayTool
         include/renderer.h
         include/display.h
         src/WaylandFramework.cpp
+        src/button.cpp
+        src/context.cpp
+        src/display.cpp
+        src/renderer.cpp
+        src/surface.cpp
+        src/text-field.h.cpp
 )
 
 # Link necessary libraries

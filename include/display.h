@@ -1,6 +1,7 @@
 #ifndef GWAYTOOL_DISPLAY_H
 #define GWAYTOOL_DISPLAY_H
 
+
 #include <wayland-client.h>
 #include <wayland-client-protocol.h>
 #include <wayland-egl.h>
@@ -8,7 +9,15 @@
 #include <cairo/cairo-gl.h>
 #include <xdg-shell-client-protocol.h>
 #include <string>
+#include <cstring>
 #include "button.h"
+
+int pointer_x = 0;
+int pointer_y = 0;
+
+bool isDragging = false;
+int dragOffsetX = 0;
+int dragOffsetY = 0;
 
 class WaylandDisplay {
 public:
@@ -24,11 +33,17 @@ public:
                                      uint32_t serial, uint32_t time, uint32_t button,
                                      uint32_t state);
 
+    struct wl_seat* seat = nullptr;
+    struct wl_keyboard* keyboard = nullptr;
+
+
 private:
     struct wl_display* display;
     struct wl_registry* registry;
     struct wl_compositor* compositor;
     struct xdg_wm_base* xdg_wm_base;
+
+
     static void registryHandler(void* data, struct wl_registry* registry,
                                 uint32_t id, const char* interface, uint32_t version);
     static void registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id);

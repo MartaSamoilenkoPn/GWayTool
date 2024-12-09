@@ -1,6 +1,7 @@
 #ifndef WAYLAND_FRAMEWORK_H
 #define WAYLAND_FRAMEWORK_H
 
+
 #include <wayland-client.h>
 #include <wayland-client-protocol.h>
 #include <wayland-egl.h>
@@ -8,7 +9,6 @@
 #include <cairo/cairo-gl.h>
 #include <xdg-shell-client-protocol.h>
 #include <string>
-#include "button.h"
 #include "display.h"
 
 
