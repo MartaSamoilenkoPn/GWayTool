@@ -3,6 +3,7 @@
 #include "context.h"
 #include "text-field.h"
 #include <optional>
+#include "checkbox.h"
 #pragma once
 
 class CairoRenderer {
@@ -16,6 +17,12 @@ public:
         std::cout << "checking move" << std::endl;
         buttons.emplace_back(std::move(button));
     }
+    void addCheckbox(const Checkbox& checkbox) {
+        std::cout << "checking checkbox" << std::endl;
+        checkboxes.emplace_back(std::move(checkbox));
+    }
+    void drawCheckboxes();
+    void handleClickCheckBox(int x, int y);
 
 
     void handleClick(int x, int y);
@@ -39,6 +46,7 @@ private:
     cairo_surface_t* cairo_surface;
     cairo_t* cairo_context;
     std::vector<Button> buttons;
+    std::vector<Checkbox> checkboxes;
     double bg_r = 0.5, bg_g = 0.5, bg_b = 0.5;
 };
 

@@ -13,6 +13,7 @@
 #include <xkbcommon/xkbcommon-compose.h>
 #include <vector>
 #include "button.h"
+#include "checkbox.h"
 #include "text-field.h"
 
 class WaylandApplication {

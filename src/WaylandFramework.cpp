@@ -380,6 +380,27 @@ void CairoRenderer::drawButton() {
 }
 
 
+// Handle clicks to check if a checkbox is clicked
+void CairoRenderer::handleClickCheckBox(int x, int y) {
+    for (auto& checkbox : checkboxes) {
+        if (checkbox.contains(x, y)) {
+            checkbox.toggle(); // Toggle the checkbox state
+            drawCheckboxes();  // Redraw all checkboxes
+            break;
+        }
+    }
+}
+
+void CairoRenderer::drawCheckboxes() {
+    cairo_t* cr = cairo_create(cairo_surface);
+    for (const auto& checkbox : checkboxes) {
+        checkbox.draw(cr);
+    }
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
+
+
 
 // -------------------- WaylandApplication Implementation --------------------
 void CairoRenderer::drawTextInput(const TextInput& textInput) {
@@ -475,6 +496,7 @@ void WaylandApplication::onMouseClick(int x, int y) {
     }
     else {
         renderer.handleClick(x, y);
+        renderer.handleClickCheckBox(x, y);
     }
 }
 
@@ -487,6 +509,10 @@ void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyb
     std::cout << "Keyboard event: key=" << key
               << ", state=" << (state == WL_KEYBOARD_KEY_STATE_PRESSED ? "PRESSED" : "RELEASED")
               << ", time=" << time << std::endl;
+
+    if (key == KEY_ESC) {
+        exit(0);
+    }
 
     if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
         struct xkb_context* ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
@@ -557,13 +583,19 @@ std::function<void()> createTextCallback(CairoRenderer &renderer, bool &isVisibl
         }
     };
 }
-
+void onCheckboxStateChange(bool state) {
+    std::cout << "Checkbox state: " << (state ? "Checked" : "Unchecked") << std::endl;
+}
 
 //------app
 void WaylandApplication::run() {
     std::cout << "Application running...\n";
     bool isTextVisible = false;
+    Checkbox checkbox1(50, 50, 20, "Option 1", onCheckboxStateChange);
+    renderer.addCheckbox(checkbox1);
 
+    // Draw initial checkboxes
+    renderer.drawCheckboxes();
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
 //    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
@@ -586,18 +618,18 @@ void WaylandApplication::run() {
 //    std::vector<int> values_y = {10, 30, 20, 50, 40};
 //    std::optional<std::string> title = "Line Chart Example";
 //    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
-
-    std::vector<int> values = {10, 20, 30, 40};
-    std::vector<std::tuple<double, double, double>> colors = {
-            {1.0, 0.0, 0.0},
-            {0.0, 1.0, 0.0},
-            {0.0, 0.0, 1.0},
-            {1.0, 1.0, 0.0}
-    };
-
-    std::vector<std::string> labels = {"one", "two", "three", "four"};
-    std::optional<std::string> title = "Pie Chart Example";
-    renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
+    //
+    // std::vector<int> values = {10, 20, 30, 40};
+    // std::vector<std::tuple<double, double, double>> colors = {
+    //         {1.0, 0.0, 0.0},
+    //         {0.0, 1.0, 0.0},
+    //         {0.0, 0.0, 1.0},
+    //         {1.0, 1.0, 0.0}
+    // };
+    //
+    // std::vector<std::string> labels = {"one", "two", "three", "four"};
+    // std::optional<std::string> title = "Pie Chart Example";
+    // renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
 
 
 

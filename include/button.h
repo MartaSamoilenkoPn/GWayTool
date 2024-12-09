@@ -7,8 +7,9 @@ struct Button {
     int x, y, width, height;
     std::string label;
     std::function<void()> onClick;
+    bool isCheckBox;
 
-    Button(int x, int y, int width, int height, const std::string& label, std::function<void()> onClick)
+    Button(int x, int y, int width, int height, const std::string& label, std::function<void()> onClick, bool isCheckBox)
             : x(x), y(y), width(width), height(height), label(label), onClick(onClick) {
         std::cout << "Button created" << std::endl;
     }
