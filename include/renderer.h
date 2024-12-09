@@ -10,27 +10,17 @@ public:
 
     void drawText(const std::string& text, int x, int y, double r, double g, double b);
     void drawImage(const std::string& imagePath, int x, int y, double scaleX, double scaleY);
-    void addButton(const Button& button) {
-        buttons.push_back(button);
+    void addButton(Button button) {
+        std::cout << "checking move" << std::endl;
+        buttons.emplace_back(std::move(button));
     }
 
-    void handleClick(int x, int y) {
-        for (const auto& button : buttons) {
-            if (button.contains(x, y)) {
-                if (button.onClick) {
-                    button.onClick();
-                }
-                break;
-            }
-        }
-    }
+
+    void handleClick(int x, int y);
 
     void drawButton();
     void drawTextInput(const TextInput &textInput);
     void clearArea(int x, int y, int width, int height);
-
-
-
 
 private:
     cairo_device_t* cairo_device;
