@@ -9,6 +9,7 @@
 static int pointer_x = 0;
 static int pointer_y = 0;
 bool textInputAdded = false;
+bool buttonAdded = false;
 bool isDragging = false;
 int dragOffsetX = 0;
 int dragOffsetY = 0;
@@ -473,7 +474,7 @@ void WaylandApplication::onMouseClick(int x, int y) {
         }
         renderer.drawTextInput(textInput);
     }
-    else {
+    if(buttonAdded) {
         renderer.handleClick(x, y);
     }
 }
@@ -566,17 +567,18 @@ void WaylandApplication::run() {
 
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
-//    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
-//    renderer.drawTextInput(textInput);
+//    renderer.drawText("lllll", 100, 250, 0.0, 1.0, 1.0);
+    renderer.drawTextInput(textInput);
 //    Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
 //    renderer.addButton(button1);
+//    buttonAdded = true;
 
 //    Button button2(300, 100, 150, 50, "button number 2", createTextCallback(renderer, isTextVisible));
 //    renderer.addButton(button2);
 //    renderer.drawButton();
 //    button1.click();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
-
+//    renderer.drawButton();
 //    std::vector<int> values = {50, 100, 75, 150, 200};
 //    std::vector<std::string> labels = {"lab1", "lab2", "lab3", "lab4", "lab5"};
 //    std::string title = "Test";
@@ -587,18 +589,18 @@ void WaylandApplication::run() {
 //    std::optional<std::string> title = "Line Chart Example";
 //    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
 
-    std::vector<int> values = {10, 20, 30, 40};
-    std::vector<std::tuple<double, double, double>> colors = {
-            {1.0, 0.0, 0.0},
-            {0.0, 1.0, 0.0},
-            {0.0, 0.0, 1.0},
-            {1.0, 1.0, 0.0}
-    };
-
-    std::vector<std::string> labels = {"one", "two", "three", "four"};
-    std::optional<std::string> title = "Pie Chart Example";
-    renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
-
+//    std::vector<int> values = {10, 20, 30, 40};
+//    std::vector<std::tuple<double, double, double>> colors = {
+//            {1.0, 0.0, 0.0},
+//            {0.0, 1.0, 0.0},
+//            {0.0, 0.0, 1.0},
+//            {1.0, 1.0, 0.0}
+//    };
+//
+//    std::vector<std::string> labels = {"one", "two", "three", "four"};
+//    std::optional<std::string> title = "Pie Chart Example";
+//    renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
+//
 
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
