@@ -14,11 +14,27 @@
 #include "application.h"
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
+#include "fstream"
+
 struct TextInput {
     int x, y, width, height;
     bool isFocused = false;
     int lineHeight = 20;
     std::vector<std::string> lines = {""};
+
+    std::ofstream textFile;
+    TextInput(int x, int y, int width, int height)
+            : x(x), y(y), width(width), height(height) {
+        textFile.open("output.txt", std::ios::out | std::ios::trunc);
+        if (!textFile.is_open()) {
+            throw std::runtime_error("Can't open file");
+        }
+    }
+    ~TextInput() {
+        if (textFile.is_open()) {
+            textFile.close();
+        }}
+
 
     bool contains(int px, int py) const {
         return px >= x && px <= x + width && py >= y && py <= y + height;
@@ -80,7 +96,26 @@ struct TextInput {
         }
 
         height = std::max(40, static_cast<int>(lines.size() * lineHeight));
+
+        if (textFile.is_open()) {
+            textFile.seekp(0, std::ios::beg);
+            textFile.clear();
+            for (const auto& line : lines) {
+                textFile << line << std::endl;
+            }
+            textFile.flush();
+        }
     }
+
+    std::string getInputText() const {
+        std::string input;
+        for (const auto& line : lines) {
+            input += line;
+        }
+        return input;
+    }
+
+
     void setX(int x);
     void setY(int x);
     int getX() const;

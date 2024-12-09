@@ -14,6 +14,8 @@
 #include <vector>
 #include "button.h"
 #include "text-field.h"
+#include <sstream>
+#include <fstream>
 
 class WaylandApplication {
 public:
@@ -41,7 +43,7 @@ private:
     struct xkb_context* xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
     struct xkb_keymap* xkbKeymap = nullptr;
     struct xkb_state* xkbState = nullptr;
-    TextInput textInput{100, 200, 300, 40};
+    TextInput textInput{230, 30, 400, 20};
 
 
     static void keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,

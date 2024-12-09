@@ -10,7 +10,7 @@ public:
     CairoRenderer(MyEGLContext& egl, EGLSurface egl_surface);
     ~CairoRenderer();
 
-    void drawText(const std::string& text, int x, int y, double r, double g, double b);
+    void drawText(const std::string& text, int x, int y, double r, double g, double b, int size);
     void drawImage(const std::string& imagePath, int x, int y, double scaleX, double scaleY);
     void addButton(Button button) {
         std::cout << "checking move" << std::endl;
@@ -33,6 +33,14 @@ public:
                                      const std::vector<std::tuple<double, double, double>>& colors,
                                      const std::optional<std::vector<std::string>>& optionalLabels,
                                      const std::optional<std::string>& title);
+
+    void drawLine(int x1, int y1, int x2, int y2, double r, double g, double b, double lineWidth);
+    void drawTable(const std::vector<std::vector<std::string>>& data,
+                                  int x, int y, int cellWidth, int cellHeight,
+                                  int rows, int cols,
+                                  double r, double g, double b,
+                                  double lineR, double lineG, double lineB);
+
 
 private:
     cairo_device_t* cairo_device;

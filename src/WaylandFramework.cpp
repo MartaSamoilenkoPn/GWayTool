@@ -5,6 +5,7 @@
 #include <xdg-shell-client-protocol.h>
 #include <linux/input-event-codes.h>
 #include "application.h"
+#include <xkbcommon/xkbcommon.h>
 
 static int pointer_x = 0;
 static int pointer_y = 0;
@@ -12,7 +13,8 @@ bool textInputAdded = false;
 bool isDragging = false;
 int dragOffsetX = 0;
 int dragOffsetY = 0;
-#include <xkbcommon/xkbcommon.h>
+bool buttonAdded = true;
+
 struct wl_seat* seat = nullptr;
 struct wl_keyboard* keyboard = nullptr;
 // -------------------- WaylandDisplay Implementation --------------------
@@ -57,6 +59,8 @@ static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_
                                  wl_fixed_t x, wl_fixed_t y) {
     pointer_x = wl_fixed_to_int(x);
     pointer_y = wl_fixed_to_int(y);
+
+    std::cout << "[DEBUG] Pointer moved to (" << pointer_x << ", " << pointer_y << ")\n";
 
     WaylandApplication* app = static_cast<WaylandApplication*>(data);
     app->onMouseMove(pointer_x, pointer_y);
@@ -113,7 +117,7 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
         self->xdg_wm_base = static_cast<struct xdg_wm_base*>(
                 wl_registry_bind(registry, id, &xdg_wm_base_interface, 1));
     } else if (strcmp(interface, "wl_seat") == 0) {
-        struct wl_seat* seat = static_cast<wl_seat*>(wl_registry_bind(registry, id, &wl_seat_interface, version));
+        struct wl_seat* seat = static_cast<wl_seat*>(wl_registry_bind(registry, id, &wl_seat_interface, 1));
         struct wl_pointer* pointer = wl_seat_get_pointer(seat);
 
         if (seat) {
@@ -314,22 +318,22 @@ void CairoRenderer::clearArea(int x, int y, int width, int height) {
 }
 
 
-void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
+void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b, int size) {
     cairo_t* cr = cairo_create(cairo_surface);
 
-    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
-    cairo_fill(cr);
+//    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+//    cairo_rectangle(cr, x - 10, y - 30, 150, 40);
+//    cairo_fill(cr);
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_source_rgb(cr, r, g, b);
     cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size(cr, 20);
+    cairo_set_font_size(cr, size);
     cairo_move_to(cr, x, y);
     cairo_show_text(cr, text.c_str());
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_rectangle(cr, x - 10, y - 30, 300, 40);
-    cairo_stroke(cr);
+//    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+//    cairo_rectangle(cr, x - 10, y - 30, 150, 30);
+//    cairo_stroke(cr);
 
     cairo_gl_surface_swapbuffers(cairo_surface);
     cairo_destroy(cr);
@@ -473,7 +477,7 @@ void WaylandApplication::onMouseClick(int x, int y) {
         }
         renderer.drawTextInput(textInput);
     }
-    else {
+    if(buttonAdded) {
         renderer.handleClick(x, y);
     }
 }
@@ -552,11 +556,124 @@ std::function<void()> createTextCallback(CairoRenderer &renderer, bool &isVisibl
             renderer.clearArea(50, 200, 400, 100);
             isVisible = false;
         } else {
-            renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+            renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0, 16);
             isVisible = true;
         }
     };
 }
+
+std::function<void()> showGeneralText(CairoRenderer &renderer, bool &isVisible) {
+    return [&renderer, &isVisible]() {
+        if (isVisible) {
+            renderer.clearArea(20, 250, 130, 200);
+            isVisible = false;
+        } else {
+            renderer.drawText("Here will be some text....", 20, 300, 1.0, 1.0, 1.0, 10);
+            isVisible = true;
+        }
+    };
+}
+
+std::vector<std::vector<std::string>> parseCSVData(std::ifstream &file) {
+    std::string line;
+    std::vector<std::vector<std::string>> csvData;
+
+    while (std::getline(file, line)) {
+        std::stringstream lineStream(line);
+        std::string cell;
+        std::vector<std::string> row;
+
+        while (std::getline(lineStream, cell, ',')) {
+            cell.erase(cell.begin(), std::find_if(cell.begin(), cell.end(), [](unsigned char ch) {
+                return !std::isspace(ch);
+            }));
+            cell.erase(std::find_if(cell.rbegin(), cell.rend(), [](unsigned char ch) {
+                return !std::isspace(ch);
+            }).base(), cell.end());
+
+            row.push_back(cell);
+        }
+
+        csvData.push_back(row);
+    }
+
+    file.close();
+
+    return csvData;
+}
+
+
+std::function<void()> parseFile(CairoRenderer &renderer, TextInput &textInput,
+                                std::vector<std::vector<std::string>> &csvData) {
+
+    return [&renderer, &textInput, &csvData]() {
+        std::string filePath = textInput.getInputText();
+
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            renderer.drawText("Failed to open file", 20, 300, 1.0, 0.0, 0.0, 10);
+            return;
+        }
+
+        csvData = parseCSVData(file);
+        renderer.drawText("Finished processing", 230, 83, 0.0, 1.0, 0.0, 10);
+
+    };
+}
+
+std::function<void()> showTable(CairoRenderer &renderer, int x, int y, std::vector<std::vector<std::string>> &csvData) {
+    return [&renderer, x, y, &csvData] {
+        int rows = csvData.size();
+        int cols = rows > 0 ? csvData[0].size() : 0;
+
+        if (rows == 0 || cols == 0) {
+            renderer.drawText("No data in file", 20, 300, 1.0, 0.0, 0.0, 10);
+            return;
+        }
+
+        int cellWidth = 100;
+        int cellHeight = 20;
+        double textR = 1.0, textG = 1.0, textB = 1.0;
+        double lineR = 0.5, lineG = 0.5, lineB = 0.5;
+
+        renderer.drawTable(csvData, x, y, cellWidth, cellHeight, rows, cols, textR, textG, textB, lineR, lineG, lineB);
+    };
+}
+
+
+std::function<void()> showBarChart(CairoRenderer &renderer,
+                                   const std::vector<int> &values,
+                                   const std::vector<std::string> &labels,
+                                   std::optional<std::string> &title) {
+    return [&renderer, values, labels, title]() {
+        renderer.clearArea(270, 300, 400, 400);
+        renderer.drawBarChart(values, 320, 340, 300, 130, 0.2, 0.6, 0.8, labels, title);
+    };
+}
+
+std::function<void()> showLineChart(CairoRenderer &renderer,
+                                   const std::vector<int> &values_x,
+                                    const std::vector<int> &values_y,
+                                   const std::vector<std::string> &labels,
+                                    std::optional<std::string> &title) {
+    return [&renderer, values_x, values_y, labels, title]() {
+        renderer.clearArea(270, 300, 400, 400);
+        renderer.drawLineChart(values_x, values_y, 320, 340, 300, 130, 0.0, 1.0, 0.0, title);
+    };
+}
+
+
+std::function<void()> showPieChart(CairoRenderer &renderer,
+                                    const std::vector<int> &values,
+                                    const std::vector<std::tuple<double, double, double>> colors,
+                                    const std::vector<std::string> &labels,
+                                    std::optional<std::string> &title) {
+    return [&renderer, values, colors, labels, title]() {
+        renderer.clearArea(270, 300, 400, 400);
+        renderer.drawPieChart(values, 450, 400, 60, colors, labels, title);
+    };
+}
+
 
 
 //------app
@@ -564,30 +681,31 @@ void WaylandApplication::run() {
     std::cout << "Application running...\n";
     bool isTextVisible = false;
 
-//    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
+    renderer.drawText("Program Sunny", 20, 40, 1.0, 1.0, 1.0, 20);
+    renderer.drawImage("./../sun.png", 30, 50, 0.25, 0.25);
+    renderer.drawLine(200, 1, 200, 700, 1.0, 1.0, 0.0, 1.2);
+    renderer.drawLine(200, 100, 1000, 100, 1.0, 1.0, 0.0, 1.2);
 
-//    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
-//    renderer.drawTextInput(textInput);
-//    Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
-//    renderer.addButton(button1);
+    renderer.drawText("draw a table from the csv", 230, 130, 1.0, 1.0, 1.0, 15);
 
-//    Button button2(300, 100, 150, 50, "button number 2", createTextCallback(renderer, isTextVisible));
-//    renderer.addButton(button2);
-//    renderer.drawButton();
-//    button1.click();
-//    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
+    Button button1(20, 200, 100, 30, "Show/Hide text", showGeneralText(renderer, isTextVisible));
 
-//    std::vector<int> values = {50, 100, 75, 150, 200};
-//    std::vector<std::string> labels = {"lab1", "lab2", "lab3", "lab4", "lab5"};
-//    std::string title = "Test";
-//    renderer.drawBarChart(values, 100, 100, 400, 200, 0.2, 0.6, 0.8, labels, title);
 
-//    std::vector<int> values_x = {10, 30, 20, 50, 40};
-//    std::vector<int> values_y = {10, 30, 20, 50, 40};
-//    std::optional<std::string> title = "Line Chart Example";
-//    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
+    std::vector<std::vector<std::string>> csvData;
+    Button button2(430, 115, 70, 20, "Parse CSV", parseFile(renderer, textInput, csvData));
+    Button button3(520, 115, 100, 20, "Show table", showTable(renderer, 220, 150, csvData));
 
-    std::vector<int> values = {10, 20, 30, 40};
+    renderer.drawLine(200, 250, 1000, 250, 1.0, 1.0, 0.0, 1.2);
+
+    std::vector<int> values_bar_chart = {50, 100, 75, 150, 200};
+    std::vector<std::string> labels_bar_chart = {"val1", "val2", "val3", "val4", "val5"};
+    std::optional<std::string> title_bar = "Testing bar chart";
+
+    std::vector<int> values_x = {10, 30, 20, 50, 40};
+    std::vector<int> values_y = {10, 30, 20, 50, 40};
+    std::optional<std::string> title_line = "Testing Line Chart";
+
+    std::vector<int> values_pie = {10, 20, 30, 40};
     std::vector<std::tuple<double, double, double>> colors = {
             {1.0, 0.0, 0.0},
             {0.0, 1.0, 0.0},
@@ -595,9 +713,32 @@ void WaylandApplication::run() {
             {1.0, 1.0, 0.0}
     };
 
-    std::vector<std::string> labels = {"one", "two", "three", "four"};
-    std::optional<std::string> title = "Pie Chart Example";
-    renderer.drawPieChart(values, 100, 100, 50, colors, labels, title);
+    std::vector<std::string> labels_pie = {"one", "two", "three", "four"};
+    std::optional<std::string> title_pie = "Testing Pie Chart";
+
+
+    Button button4(230, 270, 100, 20, "Show bar chart",
+                   showBarChart(renderer, values_bar_chart, labels_bar_chart, title_bar));
+
+    Button button5(350, 270, 100, 20, "Show line chart",
+                   showLineChart(renderer, values_x, values_y, labels_bar_chart, title_line));
+
+    Button button6(470, 270, 100, 20, "Show pie chart",
+                   showPieChart(renderer, values_pie, colors, labels_pie, title_pie));
+
+
+
+    renderer.addButton(button1);
+    renderer.addButton(button2);
+    renderer.addButton(button3);
+    renderer.addButton(button4);
+    renderer.addButton(button5);
+    renderer.addButton(button6);
+
+
+    renderer.drawButton();
+
+    renderer.drawTextInput(textInput);
 
 
 

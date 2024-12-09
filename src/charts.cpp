@@ -28,7 +28,7 @@ void CairoRenderer::drawBarChart(const std::vector<int>& values, int x, int y, i
         cairo_fill(cr);
     }
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
     cairo_set_line_width(cr, 2.0);
 
     cairo_move_to(cr, x, y + height);
@@ -254,11 +254,81 @@ void CairoRenderer::drawPieChart(const std::vector<int>& values, int x, int y, i
         cairo_text_extents_t extents;
         cairo_text_extents(cr, title->c_str(), &extents);
 
-        double title_x = x + (radius / 2.0) - (extents.width / 2.0);
+        double title_x = x + (radius / 2.0) - (extents.width / 2.0) - 30;
         double title_y = y - radius - 20;
 
         cairo_move_to(cr, title_x, title_y);
         cairo_show_text(cr, title->c_str());
+    }
+
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
+
+
+void CairoRenderer::drawLine(int x1, int y1, int x2, int y2,
+                             double r, double g, double b, double lineWidth) {
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    cairo_set_source_rgb(cr, r, g, b);
+
+    cairo_set_line_width(cr, lineWidth);
+
+    cairo_move_to(cr, x1, y1);
+    cairo_line_to(cr, x2, y2);
+
+    cairo_stroke(cr);
+
+    cairo_destroy(cr);
+}
+
+
+void CairoRenderer::drawTable(const std::vector<std::vector<std::string>>& data,
+                              int x, int y, int cellWidth, int cellHeight,
+                              int rows, int cols,
+                              double r, double g, double b,
+                              double lineR, double lineG, double lineB) {
+    if (data.empty() || data.size() != rows || data[0].size() != cols) return;
+
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    for (int i = 0; i <= rows; ++i) {
+        int yOffset = y + i * cellHeight;
+        cairo_set_source_rgb(cr, lineR, lineG, lineB);
+        cairo_move_to(cr, x, yOffset);
+        cairo_line_to(cr, x + cols * cellWidth, yOffset);
+        cairo_stroke(cr);
+    }
+    for (int j = 0; j <= cols; ++j) {
+        int xOffset = x + j * cellWidth;
+        cairo_set_source_rgb(cr, lineR, lineG, lineB);
+        cairo_move_to(cr, xOffset, y);
+        cairo_line_to(cr, xOffset, y + rows * cellHeight);
+        cairo_stroke(cr);
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            // Cell background color
+//            cairo_set_source_rgb(cr, r, g, b);
+//            cairo_rectangle(cr, x + j * cellWidth, y + i * cellHeight, cellWidth, cellHeight);
+//            cairo_fill(cr);
+
+            // Draw text in the cell
+            cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // White text
+            cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+            cairo_set_font_size(cr, 12);
+
+            std::string text = data[i][j];
+            cairo_text_extents_t extents;
+            cairo_text_extents(cr, text.c_str(), &extents);
+
+            double text_x = x + j * cellWidth + (cellWidth - extents.width) / 2;
+            double text_y = y + i * cellHeight + (cellHeight + extents.height) / 2;
+
+            cairo_move_to(cr, text_x, text_y);
+            cairo_show_text(cr, text.c_str());
+        }
     }
 
     cairo_gl_surface_swapbuffers(cairo_surface);

@@ -29,11 +29,11 @@ struct Button {
     }
 
     void draw(cairo_t* cr) const {
-        cairo_set_source_rgb(cr, 0.8, 0.6, 0.9);
+        cairo_set_source_rgb(cr, 1.0, 1.0, 0.0);
         cairo_rectangle(cr, x, y, width, height);
         cairo_fill(cr);
 
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
         cairo_move_to(cr, x + 10, y + height / 2);
         cairo_show_text(cr, label.c_str());
     }
