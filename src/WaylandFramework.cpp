@@ -8,7 +8,10 @@
 
 static int pointer_x = 0;
 static int pointer_y = 0;
-
+bool textInputAdded = false;
+bool isDragging = false;
+int dragOffsetX = 0;
+int dragOffsetY = 0;
 #include <xkbcommon/xkbcommon.h>
 struct wl_seat* seat = nullptr;
 struct wl_keyboard* keyboard = nullptr;
@@ -33,12 +36,23 @@ static void pointerLeaveHandler(void* data, struct wl_pointer* pointer, uint32_t
 static void pointerButtonHandler(void* data, struct wl_pointer* pointer, uint32_t serial,
                                  uint32_t time, uint32_t button, uint32_t state) {
     const char* state_str = (state == WL_POINTER_BUTTON_STATE_PRESSED) ? "pressed" : "released";
+//    if (!textInputAdded){
     if (state_str == "pressed") {
         auto* app = static_cast<WaylandApplication*>(data);
         app->onMouseClick(pointer_x, pointer_y);
     }
     std::cout << "Button " << state_str << " at (" << pointer_x << ", " << pointer_y << ")\n";
-}
+//    }
+//    else {
+        WaylandApplication *app = static_cast<WaylandApplication *>(data);
+        if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
+            app->onMouseClick(pointer_x, pointer_y);
+        }
+        else if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
+            app->onMouseRelease(pointer_x, pointer_y);
+//    }
+}}
+
 
 static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                uint32_t axis, wl_fixed_t value) {
@@ -46,14 +60,16 @@ static void pointerAxisHandler(void* data, struct wl_pointer* pointer, uint32_t 
     std::cout << "Scroll " << axis_str << " by " << wl_fixed_to_double(value) << "\n";
 }
 
+
 static void pointerMotionHandler(void* data, struct wl_pointer* pointer, uint32_t time,
                                  wl_fixed_t x, wl_fixed_t y) {
-    std::cout << "Raw motion coordinates: x=" << x << ", y=" << y << "\n";
-
     pointer_x = wl_fixed_to_int(x);
     pointer_y = wl_fixed_to_int(y);
-    std::cout << "Pointer moved to: (" << pointer_x << ", " << pointer_y << ")\n";
+
+    WaylandApplication* app = static_cast<WaylandApplication*>(data);
+    app->onMouseMove(pointer_x, pointer_y);
 }
+
 
 static void pointerFrameHandler(void* data, struct wl_pointer* pointer) {
 //    std::cout << "Pointer frame event received.\n";
@@ -121,14 +137,6 @@ void WaylandDisplay::registryHandler(void* data, struct wl_registry* registry,
 
 }
 
-void WaylandDisplay::pointerButtonHandler(void* data, struct wl_pointer* pointer,
-                                 uint32_t serial, uint32_t time, uint32_t button,
-                                 uint32_t state) {
-    if (state == WL_POINTER_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
-        auto* app = static_cast<WaylandApplication*>(data);
-        app->onMouseClick(pointer_x, pointer_y);
-    }
-}
 
 void WaylandDisplay::registryRemoveHandler(void* data, struct wl_registry* registry, uint32_t id) {
     std::cout << "Global object removed: ID = " << id << "\n";
@@ -301,6 +309,23 @@ CairoRenderer::~CairoRenderer() {
     std::cout << "Cairo resources released.\n";
 }
 
+void CairoRenderer::clearArea(int x, int y, int width, int height) {
+    cairo_t* cr = cairo_create(cairo_surface);
+
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+
+    cairo_rectangle(cr, x, y, width, height);
+    cairo_fill(cr);
+
+    cairo_destroy(cr);
+    cairo_gl_surface_swapbuffers(cairo_surface);
+}
+
+
+
+
+
+
 void CairoRenderer::drawText(const std::string& text, int x, int y, double r, double g, double b) {
     cairo_t* cr = cairo_create(cairo_surface);
 
@@ -377,6 +402,13 @@ void CairoRenderer::drawButton() {
 
 
 // -------------------- WaylandApplication Implementation --------------------
+void CairoRenderer::drawTextInput(const TextInput& textInput) {
+    textInputAdded = true;
+    cairo_t* cr = cairo_create(cairo_surface);
+    textInput.draw(cr);
+    cairo_gl_surface_swapbuffers(cairo_surface);
+    cairo_destroy(cr);
+}
 
 WaylandApplication::WaylandApplication()
     : display(), surface(display), egl(display.getDisplay()),
@@ -389,10 +421,10 @@ WaylandApplication::WaylandApplication()
     std::cout << "WaylandApplication initialized successfully.\n";
 }
 
-void WaylandApplication::onMouseClick(int x, int y) {
-    std::cout << "it goes to on mouse click" << std::endl;
-    renderer.handleClick(x, y);
-}
+//void WaylandApplication::onMouseClick(int x, int y) {
+//    std::cout << "it goes to on mouse click" << std::endl;
+//    renderer.handleClick(x, y);
+//}
 
 const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .keymap = [](void* data, struct wl_keyboard* keyboard, uint32_t format, int fd, uint32_t size) {
@@ -407,57 +439,124 @@ const struct wl_keyboard_listener WaylandApplication::keyboard_listener = {
         .repeat_info = [](void* data, struct wl_keyboard* keyboard, int32_t rate, int32_t delay) {
         }
 };
+void TextInput::setX(int x) {
+    this->x = x;
+}
+
+void TextInput::setY(int y) {
+    this->y = y;
+}
+
+int TextInput::getX() const {
+    return x;
+}
+
+int TextInput::getY() const {
+    return y;
+}
+
+void WaylandApplication::onMouseRelease(int x, int y) {
+    isDragging = false;
+}
+void WaylandApplication::onMouseMove(int x, int y) {
+    if (isDragging) {
+        std::cout << "Dragging started. Mouse position: (" << x << ", " << y << ")\n";
+
+        int oldX = textInput.getX();
+        int oldY = textInput.getY();
+        std::cout << "Old position: (" << oldX << ", " << oldY << ")\n";
+
+        textInput.setX(x - dragOffsetX);
+        textInput.setY(y - dragOffsetY);
+
+        std::cout << "Clearing area: (" << oldX << ", " << oldY << ")\n";
+//        renderer.clearArea(oldX, oldY, textInput.width, textInput.height);
+        renderer.clearArea(oldX - 4, oldY - 4, textInput.width + 8, textInput.height + 8);
+
+
+        std::cout << "Drawing new position: (" << textInput.getX() << ", " << textInput.getY() << ")\n";
+        renderer.drawTextInput(textInput);
+    }
+}
+
+void WaylandApplication::onMouseClick(int x, int y) {
+    if (textInputAdded) {
+        if (textInput.contains(x, y)) {
+            textInput.isFocused = true;
+            std::cout << "TextInput focused.\n";
+
+            if (!isDragging) {
+                isDragging = true;
+                std::cout << "Dragging initialized.\n";
+                dragOffsetX = x - textInput.getX();
+                dragOffsetY = y - textInput.getY();
+            }
+        } else {
+            textInput.isFocused = false;
+        }
+        renderer.drawTextInput(textInput);
+    }
+    else {
+        std::cout << "it goes to on mouse click" << std::endl;
+        renderer.handleClick(x, y);
+    }
+}
+
+
 
 void WaylandApplication::keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
-                                            uint32_t serial, uint32_t time,
-                                            uint32_t key, uint32_t state) {
+                                            uint32_t serial, uint32_t time, uint32_t key,
+                                            uint32_t state) {
     auto* app = static_cast<WaylandApplication*>(data);
+
+    std::cout << "Keyboard event: key=" << key
+              << ", state=" << (state == WL_KEYBOARD_KEY_STATE_PRESSED ? "PRESSED" : "RELEASED")
+              << ", time=" << time << std::endl;
 
     if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
         struct xkb_context* ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
         if (!ctx) {
-            std::cerr << "Failed to create XKB context" << std::endl;
+            std::cerr << "Failed to create XKB context." << std::endl;
             return;
         }
 
         struct xkb_keymap* keymap = xkb_keymap_new_from_names(ctx, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
         if (!keymap) {
-            std::cerr << "Failed to create keymap" << std::endl;
+            std::cerr << "Failed to create XKB keymap." << std::endl;
             xkb_context_unref(ctx);
             return;
         }
 
         struct xkb_state* xkb_state = xkb_state_new(keymap);
         if (!xkb_state) {
-            std::cerr << "Failed to create XKB state" << std::endl;
+            std::cerr << "Failed to create XKB state." << std::endl;
             xkb_keymap_unref(keymap);
             xkb_context_unref(ctx);
             return;
         }
 
-        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8);
-        if (keysym != XKB_KEY_NoSymbol) {
-            if (keysym == XKB_KEY_BackSpace) {
-                if (!app->input_text.empty()) {
-                    app->input_text.pop_back();
-                }
-            } else {
-                char buffer[64];
-                int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
-                if (size > 0) {
-                    buffer[size] = '\0';
-                    std::cout << "Key pressed: " << buffer << " (keycode: " << key << ", keysym: " << keysym << ")" << std::endl;
+        uint32_t keysym = xkb_state_key_get_one_sym(xkb_state, key + 8); // Додаємо 8 для коректного keycode
+        char buffer[64];
+        int size = xkb_keysym_to_utf8(keysym, buffer, sizeof(buffer));
+        buffer[size] = '\0';
 
-                    app->input_text += buffer;
-                }
+        std::cout << "Key pressed: keysym=" << keysym
+                  << ", utf8='" << buffer << "'"
+                  << ", keycode=" << key << std::endl;
+//        app->textInput.isFocused = true;
+        if (app->textInput.isFocused) {
+            if (keysym == XKB_KEY_Escape) {
+                std::cout << "Escape key detected. Unfocusing text input." << std::endl;
+                app->textInput.isFocused = false;
+            } else {
+                app->textInput.handleKeyPress(keysym);
+                app->renderer.drawTextInput(app->textInput);
             }
         }
 
         xkb_state_unref(xkb_state);
         xkb_keymap_unref(keymap);
         xkb_context_unref(ctx);
-
-        app->renderer.drawText(app->input_text, 100, 250, 1.0, 1.0, 1.0);
     }
 }
 
@@ -477,9 +576,14 @@ void WaylandApplication::run() {
 //    renderer.drawText("Hello, Wayland!", 100, 250, 1.0, 1.0, 1.0);
 
 //    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
-    Button button1(100, 200, 150, 50, "button number 1", sayHelloWorld);
+//    renderer.drawTextInput(textInput);
+    Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
     renderer.addButton(button1);
 
+    renderer.drawButton();
+
+    Button button2(300, 100, 150, 50, "button number 2", sayHelloWorld);
+    renderer.addButton(button2);
     renderer.drawButton();
 //    button1.click();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);

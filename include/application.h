@@ -13,6 +13,7 @@
 #include <xkbcommon/xkbcommon-compose.h>
 #include <vector>
 #include "button.h"
+#include "text-field.h"
 
 class WaylandApplication {
 public:
@@ -24,8 +25,8 @@ public:
     void run();
     void onMouseClick(int x, int y);
     static const struct wl_keyboard_listener keyboard_listener;
-
-
+    void onMouseMove(int x, int y);
+    void onMouseRelease(int x, int y);
 private:
     WaylandDisplay display;
     WaylandSurface surface;
@@ -42,11 +43,14 @@ private:
     struct xkb_context* xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
     struct xkb_keymap* xkbKeymap = nullptr;
     struct xkb_state* xkbState = nullptr;
+    TextInput textInput{100, 200, 300, 40};
 
 
     static void keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
                                    uint32_t serial, uint32_t time, uint32_t key,
                                    uint32_t state);
+
+
 
 
 };

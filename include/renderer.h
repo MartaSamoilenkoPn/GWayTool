@@ -1,6 +1,7 @@
 #ifndef GWAYTOOL_RENDERER_H
 #define GWAYTOOL_RENDERER_H
 #include "context.h"
+#include "text-field.h"
 
 class CairoRenderer {
 public:
@@ -18,6 +19,8 @@ public:
     void handleClick(int x, int y);
 
     void drawButton();
+    void drawTextInput(const TextInput &textInput);
+    void clearArea(int x, int y, int width, int height);
 
 private:
     cairo_device_t* cairo_device;
