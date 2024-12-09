@@ -26,6 +26,9 @@ public:
                       double r, double g, double b,
                       const std::optional<std::vector<std::string>>& optionalLabels = std::nullopt,
                       const std::optional<std::string> &title = std::nullopt);
+    void drawLineChart(const std::vector<int>& x_values, const std::vector<int>& y_values, int x, int y, int width, int height,
+                                      double r, double g, double b,
+                                      const std::optional<std::string> &title);
 
 private:
     cairo_device_t* cairo_device;

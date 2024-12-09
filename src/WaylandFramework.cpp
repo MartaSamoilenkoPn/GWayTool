@@ -577,10 +577,16 @@ void WaylandApplication::run() {
 //    button1.click();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
 
-    std::vector<int> values = {50, 100, 75, 150, 200};
-    std::vector<std::string> labels = {"lab1", "lab2", "lab3", "lab4", "lab5"};
-    std::string title = "Test";
-    renderer.drawBarChart(values, 100, 100, 400, 200, 0.2, 0.6, 0.8, labels, title);
+//    std::vector<int> values = {50, 100, 75, 150, 200};
+//    std::vector<std::string> labels = {"lab1", "lab2", "lab3", "lab4", "lab5"};
+//    std::string title = "Test";
+//    renderer.drawBarChart(values, 100, 100, 400, 200, 0.2, 0.6, 0.8, labels, title);
+
+    std::vector<int> values_x = {10, 30, 20, 50, 40};
+    std::vector<int> values_y = {10, 30, 20, 50, 40};
+    std::optional<std::string> title = "Line Chart Example";
+    renderer.drawLineChart(values_x, values_y, 50, 50, 400, 200, 0.0, 1.0, 0.0, title);
+
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
         // Main event loop
