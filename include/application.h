@@ -21,7 +21,6 @@ public:
     ~WaylandApplication();
 
 
-
     void run();
     void onMouseClick(int x, int y);
     static const struct wl_keyboard_listener keyboard_listener;
@@ -37,7 +36,6 @@ private:
     std::vector<std::string> lines;
 
 
-
     std::string input_text;
 
     struct xkb_context* xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
@@ -49,9 +47,6 @@ private:
     static void keyboardKeyHandler(void* data, struct wl_keyboard* keyboard,
                                    uint32_t serial, uint32_t time, uint32_t key,
                                    uint32_t state);
-
-
-
 
 };
 #endif //GWAYTOOL_APPLICATION_H

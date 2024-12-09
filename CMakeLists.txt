@@ -49,6 +49,7 @@ add_executable(GWayTool
         include/renderer.h
         include/display.h
         src/WaylandFramework.cpp
+        src/charts.cpp
 )
 
 # Link necessary libraries

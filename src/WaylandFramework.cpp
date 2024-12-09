@@ -380,6 +380,7 @@ void CairoRenderer::drawButton() {
 }
 
 
+
 // -------------------- WaylandApplication Implementation --------------------
 void CairoRenderer::drawTextInput(const TextInput& textInput) {
     textInputAdded = true;
@@ -567,15 +568,19 @@ void WaylandApplication::run() {
 
 //    renderer.drawText("", 100, 250, 1.0, 1.0, 1.0);
 //    renderer.drawTextInput(textInput);
-    Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
-    renderer.addButton(button1);
+//    Button button1(400, 400, 150, 50, "button number 1", sayHelloWorld);
+//    renderer.addButton(button1);
 
-    Button button2(300, 100, 150, 50, "button number 2", createTextCallback(renderer, isTextVisible));
-    renderer.addButton(button2);
-    renderer.drawButton();
+//    Button button2(300, 100, 150, 50, "button number 2", createTextCallback(renderer, isTextVisible));
+//    renderer.addButton(button2);
+//    renderer.drawButton();
 //    button1.click();
 //    renderer.drawImage("../sun.png", 100, 100, 0.5, 0.5);
 
+    std::vector<int> values = {50, 100, 75, 150, 200};
+    std::vector<std::string> labels = {"lab1", "lab2", "lab3", "lab4", "lab5"};
+    std::string title = "Test";
+    renderer.drawBarChart(values, 100, 100, 400, 200, 0.2, 0.6, 0.8, labels, title);
 
     while (wl_display_dispatch(display.getDisplay()) != -1) {
         // Main event loop
